@@ -3,7 +3,7 @@ import sys
 import copy
 
 # Helper functions to aid in your implementation. Can edit/remove
-# Iteration that uses new Dict as marking, Visted dict as been moved out. Only Shallow Copy Path Taken
+# Iteration that uses new Dict as marking, Visted dict as been moved out.
 # Class to contain all data from input file
 class InitParams:
     # Class level var
@@ -274,12 +274,7 @@ def getActionsNodes(node) -> list:
     acts = []
     listOfPos = getValidSpots(node.curPos, "king")
     for pos in listOfPos:
-        a = copy.deepcopy(node.curPos)
-        b = copy.deepcopy(node.nextPos)
-        c = copy.deepcopy(node.totalCost)
-        d = list(node.pathTaken)
-        newNode = Node(a,b,d,0,c)
-        #newNode = copy.deepcopy(node)
+        newNode = copy.deepcopy(node)
         newNode.nextPos = pos
         #newNode.costToNextPos = InitParams.dictOfStepCost.get(pos, 1) #Get cost or default value of 1
         #updateEvalCost(newNode)

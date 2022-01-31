@@ -19,4 +19,5 @@ def run_AStar():
 
     moves, nodesExplored, pathCost= search() #For reference
     return moves, nodesExplored, pathCost #Format to be returned
-    
+
+run_AStar()
