@@ -1,4 +1,5 @@
 #from collections import deque
+import queue
 import sys
 import copy
 import heapq
@@ -185,6 +186,7 @@ class Node:
 
 class PQ:
     def __init__(self) -> None:
+        x = queue.PriorityQueue()
         self.count = 0
         self.pqList = []
         heapq.heapify(self.pqList)
@@ -193,7 +195,7 @@ class PQ:
     def push(self,node):
         fn = node.evalCost
         totalCost = node.totalCost
-        entry = (fn, self.index, node)
+        entry = (totalCost + fn, self.index - 1, node)
         heapq.heappush(self.pqList, entry)
         self.index+=1
         self.count+=1
@@ -243,7 +245,7 @@ def search():
         curNode = frontier.pop()
         curPos = curNode.curPos
         nextPos = curNode.nextPos
-        if (Board.poppedDict.get(nextPos,0) != 0 or Board.markAsDeleted.pop(nextPos,0) != 0): #marAsDeleted used to know which extra node has been added in
+        if (Board.poppedDict.get(nextPos,0) != 0 ):#or Board.markAsDeleted.pop(nextPos,0) != 0): #marAsDeleted used to know which extra node has been added in
             continue
         Board.poppedDict[nextPos] = 1
         curTuple = (curPos[0], int(curPos[1:]))
@@ -278,6 +280,7 @@ def getStartActions() -> list:
     stPos = stPosList[0]
     Board.totalCount+=1
     Board.visited[stPos] = 1
+    evalCost = InitParams.dictOfStepCost.get(stPos,1)
     startNode = Node(stPos,0,[],0,0)
     ls = getActionsNodes(startNode)
     return ls
