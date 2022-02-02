@@ -185,7 +185,7 @@ def run_BFS():
     read_input()
     #printInit()
     setupBoard()
-    #printBoard()
+    printBoard()
     if (checkEarlyGoal()):
         return [],0
     # You can code in here but you cannot remove this function or change the return type

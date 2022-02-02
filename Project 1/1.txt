@@ -1,7 +1,7 @@
 Rows:21
 Cols:20
 Number of Obstacles:139
-Position of Obstacles (space between):i0 l0 a1 b1 c1 i1 j1 k1 m1 n1 o1 a2 c2 i2 k2 m2 o2 q2 r2 s2 a3 c3 i3 k3 m3 o3 a4 b4 c4 f4 g4 h4 i4 j4 k4 m4 n4 o4 q4 s4 c5 f5 h5 c6 f6 h6 q6 r6 s6 f7 g7 h7 c8 d8 e8 i8 j8 k8 m8 n8 o8 c9 e9 i9 k9 m9 o9 c10 e10 i10 k10 m10 o10 c11 d11 e11 i11 j11 k11 m11 n11 o11 f12 g12 h12 k12 l12 m12 p12 q12 r12 f13 h13 k13 m13 p13 r13 f14 h14 k14 m14 p14 r14 f15 g15 h15 k15 l15 m15 o15 p15 q15 r15 s15 b16 c16 d16 f16 m16 n16 o16 b17 d17 f17 m17 o17 b18 d18 f18 m18 o18 b19 c19 d19 e19 f19 m19 n19 o19
+Position of Obstacles (space between):i0 l0 a1 b1 c1 i1 j1 k1 m1 n1 o1 a2 c2 i2 k2 m2 o2 q2 r2 s2 a3 c3 i3 k3 m3 o3 a4 b4 c4 f4 g4 h4 i4 j4 k4 m4 n4 o4 q4 s4 c5 f5 h5 c6 f6 h6 q6 r6 s6 f7 g7 h7 c8 d8 e8 i8 j8 k8 m8 n8 o8 c9 e9 i9 k9 m9 o9 c10 e10 i10 k10 m10 o10 c11 d11 e11 i11 j11 k11 m11 n11 o11 f12 g12 h12 k12 l12 m12 p12 q12 r12 f13 h13 k13 m13 p13 r13 f14 h14 k14 m14 p14 r14 f15 g15 h15 k15 l15 m15 o15 p15 q15 r15 s15 b16 c16 d16 f16 m16 n16 o16 b17 d17 f17 m17 o17 b18 d18 f18 m18 o18 b19 c19 d19 e19 f19 m19 n19 o19 h19 f20 g17 h17 i17 j17 j18 j19 j20
 Step cost to move to selected grids (Default cost is 1) [Pos, Cost]:
 [a5,2]
 [b5,2]
@@ -81,8 +81,8 @@ Step cost to move to selected grids (Default cost is 1) [Pos, Cost]:
 [e20,2]
 [f20,2]
 [g20,2]
-[h20,2]
-[i20,2]
+[h20,6]
+[i20,1]
 [j20,2]
 [k20,2]
 [l20,2]
@@ -137,9 +137,14 @@ Step cost to move to selected grids (Default cost is 1) [Pos, Cost]:
 [q5,100]
 [s3,100]
 [s5,100]
+[h18,100]
+[g19,5]
+[g18,5]
+[i19,1]
+[i18,1]
 Number of Enemy King, Queen, Bishop, Rook, Knight (space between):0 0 0 0 0
 Position of Enemy Pieces:-
 Number of Own King, Queen, Bishop, Rook, Knight (space between):1 0 0 0 0
 Starting Position of Pieces [Piece, Pos]:
-[King,a20]
-Goal Positions (space between):r4
+[King,g20]
+Goal Positions (space between):h18
