@@ -286,7 +286,6 @@ def getActionsNodes(node) -> list:
         acts.append(newNode)
     return acts
     
-
 def updateEvalCost(node):
     """ Implemnet algo to update Node.evalCost here. 
         The cost is used for PQ   """
