@@ -195,8 +195,8 @@ class PQ:
     def push(self,node):
         fn = node.evalCost
         totalCost = node.totalCost
-        #entry = (totalCost + fn, self.index - 1, node)
-        entry = (totalCost, self.index - 1, node)
+        mhDist = getManhattanDist(node.curPos)
+        entry = (totalCost + fn, self.index - 1, node)
         heapq.heappush(self.pqList, entry)
         self.index+=1
         self.count+=1
@@ -269,12 +269,26 @@ def search():
         
     return [], Board.totalCount, 0
 
-def getManhattanDist() -> int:
+def getManhattanDist(curPos) -> int:
+    """Returns the manhattan dist to the nearest goal in int from the current position provided.
     
-    return 0
+    @params curPos: Current position in chessBoard noation.
+    @return The Manhattan Dist in int"""
+    i = 0
+    minDist = 0
+    (curX, curY) = chessPosToArr(curPos)
+    for g in InitParams.dictOfGoals:
+        if (i == 0):
+            (goalX, goalY) = chessPosToArr(g)
+            minDist = abs(curX - goalX) + abs(curY - goalY)
+            i+=1
+        else:
+            (goalX, goalY) = chessPosToArr(g)
+            curDist = abs(curX - goalX) + abs(curY - goalY)
+            if (minDist > curDist):
+                minDist = curDist
+    return minDist
 
-
-    
 def checkEarlyGoal():
     for goal in InitParams.listOfGoals:
         x,y = chessPosToArr(goal)
