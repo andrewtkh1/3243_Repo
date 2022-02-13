@@ -258,11 +258,12 @@ def search():
         Board.inPqDict.pop(nextPos)
         Board.totalCount+=1 #Other definiton of Goal
         Board.currentPathCost = curNode.totalCost
+        Board.visited[nextPos] = 1
         if (isGoal(nextPos)):
             return curNode.pathTaken, Board.totalCount, curNode.totalCost
         listOfMoveNodes = getActionsNodes(curNode)
         for i in listOfMoveNodes:
-            Board.visited[i.nextPos] = 1
+            #Board.visited[i.nextPos] = 1
             if (Board.inPqDict.get(i.nextPos,0) != 0): #if == 0, it is not in pq
                 # i is in PQ.
                 if (Board.inPqDict.get(i.nextPos,0) > i.evalCost):
@@ -380,7 +381,7 @@ def isValidSpot(x, y) -> bool:
     chessPos = arrToChessPos(x, y)
     if (InitParams.dictOfObsOnBoard.get(chessPos,1) < 1):
         return False
-    if (Board.visited.get(chessPos,-1) != -1 and Board.inPqDict.get(chessPos,0) != 0):#Not visited = -1.
+    #if (Board.visited.get(chessPos,-1) != -1 and Board.inPqDict.get(chessPos,0) != 0):#Not visited = -1.
         return True #Need to add contidon to check if node has lesser cost to next/
         #might need to get f(n) cost to compare if need to add.
         if(Board.currentPathCost >= Board.inPqDict.get(chessPos,0)): #If currentpathcost(Current path) to pos is > some other path alr in PQ 
@@ -564,4 +565,4 @@ def printInit():
     print("Dict of own pos", x.dictOfOwnPos)
     print("List of goals", x.listOfGoals)
     
-print(run_AStar())
+#print(run_AStar())
