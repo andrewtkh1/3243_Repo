@@ -195,8 +195,7 @@ class PQ:
     def push(self,node):
         fn = node.evalCost
         totalCost = node.totalCost
-        mhDist = getManhattanDist(node.curPos)
-        entry = (totalCost + fn, self.index - 1, node)
+        entry = (fn, self.index - 1, node)
         heapq.heappush(self.pqList, entry)
         self.index+=1
         self.count+=1
@@ -264,8 +263,16 @@ def search():
         listOfMoveNodes = getActionsNodes(curNode)
         for i in listOfMoveNodes:
             Board.visited[i.nextPos] = 1
-            Board.inPqDict[i.nextPos] = i.totalCost
-            frontier.push(i)
+            if (Board.inPqDict.get(i.nextPos,0) != 0): #if == 0, it is not in pq
+                # i is in PQ.
+                if (Board.inPqDict.get(i.nextPos,0) > i.evalCost):
+                    # If new node is of lesser cost
+                    Board.inPqDict[i.nextPos] = i.evalCost
+                    frontier.push(i)
+            else:
+                # I is not in PQ yet
+                Board.inPqDict[i.nextPos] = i.evalCost
+                frontier.push(i)
         
     return [], Board.totalCount, 0
 
@@ -357,7 +364,9 @@ def updateEvalCost(node):
     """Implemnet algo to update Node.evalCost here. 
         The cost is used for PQ"""
     stepCost = node.costToNextPos
-    node.evalCost = stepCost
+    totalCost = node.totalCost
+    mhDist = getManhattanDist(node.curPos)
+    node.evalCost = stepCost + totalCost + mhDist
     
 # Returns a list of valid pos depedning on piece   
 def getValidSpots(pos, piece) -> list:
@@ -392,7 +401,9 @@ def isValidSpot(x, y) -> bool:
     chessPos = arrToChessPos(x, y)
     if (InitParams.dictOfObsOnBoard.get(chessPos,1) < 1):
         return False
-    if (Board.visited.get(chessPos,-1) != -1):#Not visited = -1.
+    if (Board.visited.get(chessPos,-1) != -1 and Board.inPqDict.get(chessPos,0) != 0):#Not visited = -1.
+        return True #Need to add contidon to check if node has lesser cost to next/
+        #might need to get f(n) cost to compare if need to add.
         if(Board.currentPathCost >= Board.inPqDict.get(chessPos,0)): #If currentpathcost(Current path) to pos is > some other path alr in PQ 
             return False
         #print("Path to : ", chessPos, " Cur cost: ", Board.currentPathCost, " Cost in PQ: ", Board.inPqDict.get(chessPos,0))
