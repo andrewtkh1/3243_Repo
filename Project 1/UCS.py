@@ -555,4 +555,4 @@ def printInit():
     
 #if __name__ == "__main__":
     #run_BFS()
-print(run_UCS())
+#print(run_UCS())

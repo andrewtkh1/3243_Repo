@@ -1,4 +1,5 @@
 #from collections import deque
+from math import sqrt
 import queue
 import sys
 import copy
@@ -7,6 +8,7 @@ import heapq
 # Helper functions to aid in your implementation. Can edit/remove
 # Iteration that uses new Dict as marking, Visted dict as been moved out. Only Shallow Copy Path Taken
 # Class to contain all data from input file
+# A* using graph search with update
 class InitParams:
     # Class level var
     rows = 0
@@ -287,11 +289,11 @@ def getManhattanDist(curPos) -> int:
     for g in InitParams.dictOfGoals:
         if (i == 0):
             (goalX, goalY) = chessPosToArr(g)
-            minDist = abs(curX - goalX) + abs(curY - goalY)
+            minDist = max(abs(curX - goalX),abs(curY - goalY))
             i+=1
         else:
             (goalX, goalY) = chessPosToArr(g)
-            curDist = abs(curX - goalX) + abs(curY - goalY)
+            curDist = max(abs(curX - goalX),abs(curY - goalY))
             if (minDist > curDist):
                 minDist = curDist
     return minDist
@@ -308,7 +310,7 @@ def getStartActions() -> list:
     stPos = stPosList[0]
     Board.totalCount+=1
     Board.visited[stPos] = 1
-    evalCost = InitParams.dictOfStepCost.get(stPos,1)
+    curCost = InitParams.dictOfStepCost.get(stPos,1)
     startNode = Node(stPos,0,[],0,0)
     ls = getActionsNodes(startNode)
     return ls
@@ -337,15 +339,14 @@ def getActionsNodes(node) -> list:
         updateEvalCost(newNode)
         acts.append(newNode)
     return acts
-    
 
 def updateEvalCost(node):
     """Implemnet algo to update Node.evalCost here. 
         The cost is used for PQ"""
     stepCost = node.costToNextPos
     totalCost = node.totalCost
-    mhDist = getManhattanDist(node.curPos)
-    node.evalCost = stepCost + totalCost + mhDist - 1
+    mhDist = getManhattanDist(node.nextPos)
+    node.evalCost = stepCost + totalCost + mhDist
     
 # Returns a list of valid pos depedning on piece   
 def getValidSpots(pos, piece) -> list:
@@ -380,14 +381,17 @@ def isValidSpot(x, y) -> bool:
     chessPos = arrToChessPos(x, y)
     if (InitParams.dictOfObsOnBoard.get(chessPos,1) < 1):
         return False
-    if (Board.visited.get(chessPos,-1) != -1 and Board.inPqDict.get(chessPos,0) != 0):#Not visited = -1.
+    if (Board.visited.get(chessPos,-1) == -1):
+        #If position is not visited.
+        return True
+    if (Board.inPqDict.get(chessPos,0) != 0):#Not visited = -1.
         return True #Need to add contidon to check if node has lesser cost to next/
         #might need to get f(n) cost to compare if need to add.
         if(Board.currentPathCost >= Board.inPqDict.get(chessPos,0)): #If currentpathcost(Current path) to pos is > some other path alr in PQ 
             return False
         #print("Path to : ", chessPos, " Cur cost: ", Board.currentPathCost, " Cost in PQ: ", Board.inPqDict.get(chessPos,0))
         Board.markAsDeleted[chessPos] = 1
-    return True   
+    return False  
 
 def printBoard():
     for i in Board.board:
@@ -564,4 +568,4 @@ def printInit():
     print("Dict of own pos", x.dictOfOwnPos)
     print("List of goals", x.listOfGoals)
     
-print(run_AStar())
+#print(run_AStar())

@@ -3,6 +3,7 @@ import queue
 import sys
 import copy
 import heapq
+from math import sqrt
 
 # Helper functions to aid in your implementation. Can edit/remove
 # Iteration that uses new Dict as marking, Visted dict as been moved out. Only Shallow Copy Path Taken
@@ -288,11 +289,11 @@ def getManhattanDist(curPos) -> int:
     for g in InitParams.dictOfGoals:
         if (i == 0):
             (goalX, goalY) = chessPosToArr(g)
-            minDist = abs(curX - goalX) + abs(curY - goalY)
+            minDist = sqrt(pow(curX - goalX,2) + pow(curY - goalY,2)) 
             i+=1
         else:
             (goalX, goalY) = chessPosToArr(g)
-            curDist = abs(curX - goalX) + abs(curY - goalY)
+            curDist = sqrt(pow(curX - goalX,2) + pow(curY - goalY,2))
             if (minDist > curDist):
                 minDist = curDist
     return minDist
@@ -346,7 +347,7 @@ def updateEvalCost(node):
     stepCost = node.costToNextPos
     totalCost = node.totalCost
     mhDist = getManhattanDist(node.curPos)
-    node.evalCost = stepCost + totalCost + mhDist - 1
+    node.evalCost = stepCost + totalCost + mhDist
     
 # Returns a list of valid pos depedning on piece   
 def getValidSpots(pos, piece) -> list:

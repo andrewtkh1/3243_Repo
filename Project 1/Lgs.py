@@ -7,6 +7,7 @@ import heapq
 # Helper functions to aid in your implementation. Can edit/remove
 # Iteration that uses new Dict as marking, Visted dict as been moved out. Only Shallow Copy Path Taken
 # Class to contain all data from input file
+# A* using LGS without Updates
 class InitParams:
     # Class level var
     rows = 0
