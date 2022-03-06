@@ -72,7 +72,7 @@ class Moves:
             return
         curThreatDict = Board.dictOfThreat.get(pos, -1)
         if (curThreatDict == -1): #Threatend position is new
-            newDict = {originPos:{-1}}
+            newDict = {originPos:-1}
             Board.dictOfThreat[pos] = newDict
         else: #position alr has other threats
             curThreatDict[originPos] = -1
@@ -87,7 +87,7 @@ class Moves:
             return
         curThreatDict = Board.dictOfThreat.get(pos, -1)
         if (curThreatDict == -1): #Threatend position is new
-            newDict = {originPos:{-1}}
+            newDict = {originPos:-1}
             Board.dictOfThreat[pos] = newDict
         else: #position alr has other threats
             curThreatDict[originPos] = -1
@@ -102,7 +102,7 @@ class Moves:
             return
         curThreatDict = Board.dictOfThreat.get(pos, -1)
         if (curThreatDict == -1): #Threatend position is new
-            newDict = {originPos:{-1}}
+            newDict = {originPos:-1}
             Board.dictOfThreat[pos] = newDict
         else: #position alr has other threats
             curThreatDict[originPos] = -1
@@ -117,7 +117,7 @@ class Moves:
             return
         curThreatDict = Board.dictOfThreat.get(pos, -1)
         if (curThreatDict == -1): #Threatend position is new
-            newDict = {originPos:{-1}}
+            newDict = {originPos:-1}
             Board.dictOfThreat[pos] = newDict
         else: #position alr has other threats
             curThreatDict[originPos] = -1
@@ -133,7 +133,7 @@ class Moves:
             return
         curThreatDict = Board.dictOfThreat.get(pos, -1)
         if (curThreatDict == -1): #Threatend position is new
-            newDict = {originPos:{-1}}
+            newDict = {originPos:-1}
             Board.dictOfThreat[pos] = newDict
         else: #position alr has other threats
             curThreatDict[originPos] = -1
@@ -149,7 +149,7 @@ class Moves:
             return
         curThreatDict = Board.dictOfThreat.get(pos, -1)
         if (curThreatDict == -1): #Threatend position is new
-            newDict = {originPos:{-1}}
+            newDict = {originPos:-1}
             Board.dictOfThreat[pos] = newDict
         else: #position alr has other threats
             curThreatDict[originPos] = -1
@@ -165,7 +165,7 @@ class Moves:
             return
         curThreatDict = Board.dictOfThreat.get(pos, -1)
         if (curThreatDict == -1): #Threatend position is new
-            newDict = {originPos:{-1}}
+            newDict = {originPos:-1}
             Board.dictOfThreat[pos] = newDict
         else: #position alr has other threats
             curThreatDict[originPos] = -1
@@ -181,7 +181,7 @@ class Moves:
             return
         curThreatDict = Board.dictOfThreat.get(pos, -1)
         if (curThreatDict == -1): #Threatend position is new
-            newDict = {originPos:{-1}}
+            newDict = {originPos:-1}
             Board.dictOfThreat[pos] = newDict
         else: #position alr has other threats
             curThreatDict[originPos] = -1
@@ -223,7 +223,7 @@ def run_local():
     testfile = sys.argv[1] #Do not remove. This is your input testfile.
     fileText = open(testfile, 'r')
     read_input(fileText)
-    #sprintInit()
+    #printInit()
     setupThreatenDict()
     #printThreat()
     #print(numberOfThreat())
@@ -231,6 +231,7 @@ def run_local():
     initialThreat = copy.copy(Board.dictOfThreat)
     totalPc = InitParams.totalOwnPiece
     while(1):
+        print("Start new serch")
         randVal = randrange(totalPc) + 1
         randPc = getPcAtIndex(randVal)
         Board.dictOfRemovedPieces[randPc] = -1 #Remove Random pc
@@ -241,6 +242,7 @@ def run_local():
             Board.dictOfThreat = copy.copy(initialThreat)
         else:
             #print(Board.dictOfThreat)
+            print("Removed: ", Board.dictOfRemovedPieces)
             return formatGoalState()
     #return goalState #Format to be returned
 
