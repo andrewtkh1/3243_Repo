@@ -237,6 +237,8 @@ def run_local():
         Board.dictOfPieces.pop(randPc)
         goalFound = search()
         if (goalFound == -1):
+            print(Board.dictOfPieces)
+            print("Removed: ", Board.dictOfRemovedPieces)
             Board.dictOfPieces = copy.copy(initialPices)
             Board.dictOfThreat = copy.copy(initialThreat)
             Board.dictOfRemovedPieces.clear()
@@ -258,6 +260,7 @@ def search():
         Board.dictOfRemovedPieces[pcToRemove] = -1 #Remove actual pc
         Board.dictOfPieces.pop(pcToRemove)
         curThr = getNumberOfThreat()
+        print(curThr)
         if (curThr == 0):
             return 1
         totalPc -= 1
