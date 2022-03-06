@@ -330,7 +330,6 @@ def getActionsNodes(node) -> list:
         updateEvalCost(newNode)
         acts.append(newNode)
     return acts
-    
 
 def updateEvalCost(node):
     """Implemnet algo to update Node.evalCost here. 
