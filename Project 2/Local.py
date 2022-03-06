@@ -1,6 +1,7 @@
 from cmath import pi
-import sys
 import copy
+from random import randrange
+import sys
 
 ### IMPORTANT: Remove any print() functions or rename any print functions/variables/string when submitting on CodePost
 ### The autograder will not run if it detects any print function.
@@ -204,7 +205,7 @@ class Piece:
     pass
 
 class Board:
-    
+    totalThreat = 0
     dictOfPieces = {}
     dictOfObs = {}
     dictOfThreat = {} #Format = {'a0': {a1:1 ,a2:1}, ... }, a0 is threatened by a1 & a2. Dict within a dict
@@ -222,52 +223,61 @@ def run_local():
     testfile = sys.argv[1] #Do not remove. This is your input testfile.
     fileText = open(testfile, 'r')
     read_input(fileText)
-    printInit()
+    #sprintInit()
     setupThreatenDict()
-    printThreat()
-    print(numberOfThreat())
-    #goalState = search()
+    #printThreat()
+    #print(numberOfThreat())
+    initialPices = copy.copy(Board.dictOfPieces)
+    initialThreat = copy.copy(Board.dictOfThreat)
+    totalPc = InitParams.totalOwnPiece
+    while(1):
+        randVal = randrange(totalPc) + 1
+        randPc = getPcAtIndex(randVal)
+        Board.dictOfRemovedPieces[randPc] = -1 #Remove Random pc
+        Board.dictOfPieces.pop(randPc)
+        goalFound = search()
+        if (goalFound == -1):
+            Board.dictOfPieces = copy.copy(initialPices)
+            Board.dictOfThreat = copy.copy(initialThreat)
+        else:
+            #print(Board.dictOfThreat)
+            return formatGoalState()
     #return goalState #Format to be returned
 
 def search():
-    counter = 0
     totalPc = InitParams.totalOwnPiece
     kVal = InitParams.kValue
-    
-    while(counter >= 0):
-        randVal = counter % totalPc+1
-        randPc = getPcAtIndex(randVal)
-        Board.dictOfRemovedPieces[randPc] = -1
-        Board.dictOfPieces.pop(randPc)
-        counter+=1
-        pass
-
-def getPcAtIndex(index):
-    counter = 1
-    for pc in Board.dictOfPieces:
-        if (index == counter):
-            return pc
-        counter+=1
+    while(totalPc >= kVal):
+        curThr = getNumberOfThreat()
+        if (curThr == 0):
+            return 1
+        pcToRemove = getPieceToRemove(curThr)
+        if (pcToRemove == -1):
+            return -1
+        Board.dictOfRemovedPieces[pcToRemove] = -1 #Remove actual pc
+        Board.dictOfPieces.pop(pcToRemove)
+        totalPc -= 1
+    return -1
 
 def getPieceToRemove(curNumofThreat):
     #Non-stochastic implementation
     numOfThreat = curNumofThreat
-    pos = ''
+    pos = -1
     for pieces in Board.dictOfPieces:
         curPc = pieces
-        nameOfPc = Board.dictOfPieces.pop(pieces) #Remove a pc from board
         Board.dictOfRemovedPieces[curPc] = -1 # Add to removed dict
-        curThreat = numberOfThreat()
-        Board.dictOfPieces[curPc] = nameOfPc  # Add back pc to board
+        curThreat = getNumberOfThreat()
         Board.dictOfRemovedPieces.pop(curPc) # Remove from dict
-        if (curThreat >= numOfThreat):
+        if (curThreat <= numOfThreat):
             pos = curPc
-            numberOfThreat = curThreat
+            numOfThreat = curThreat
     return pos
 
-def numberOfThreat():
+def getNumberOfThreat():
     count = 0
     for pc in Board.dictOfPieces: #Loop thru all pcs on board.
+        if (pc in Board.dictOfRemovedPieces):
+            continue
         curThreats = Board.dictOfThreat.get(pc, 0)
         if (curThreats == 0):
             pass
@@ -279,8 +289,23 @@ def numberOfThreat():
                 else:
                     count += 1 #Once found any 1 that threatens him, thats it.
                     break
+    Board.totalThreat = count
     return count
-        
+
+def formatGoalState():
+    goalState = {}
+    for curPos in Board.dictOfPieces:
+        curTuple = (curPos[0], int(curPos[1:]))
+        pcName = Board.dictOfPieces.get(curPos)
+        goalState[curTuple] = pcName
+    return goalState
+
+def getPcAtIndex(index):
+    counter = 1
+    for pc in Board.dictOfPieces:
+        if (index == counter):
+            return pc
+        counter+=1
 
 def read_input(f):
     lineState = 0
@@ -410,4 +435,4 @@ def printThreat():
     for x in Board.dictOfThreat:
         print(x, Board.dictOfThreat.get(x))
 
-run_local()
+print(run_local())
