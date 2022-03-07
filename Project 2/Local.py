@@ -303,6 +303,7 @@ def getNumberOfThreat():
                     pass
                 else:
                     count += 1 #Once found any 1 that threatens him, thats it.
+                    break
                     
     Board.totalThreat = count
     return count
