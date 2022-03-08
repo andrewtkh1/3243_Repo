@@ -10,21 +10,160 @@ class InitParams:
     noOfObj = 0
     totalOwnPiece = 0
     listOfObjPos = []
-    kValue = 0
+    kValue = 10
     dictOfOwnPos = {'King': [], 'Queen':[], 'Bishop': [], 'Rook': [], 'Knight': []}
     dictOfObsOnBoard = {}
 
 class Board:
+    maxRows = 0
+    maxCols = 0
     totalThreat = 0
     dictOfPieces = {}
     dictOfObs = {}
     dictOfThreat = {} #Format = {'a0': {a1:1 ,a2:1}, ... }, a0 is threatened by a1 & a2. Dict within a dict
     dictOfRemovedPieces = {} #Pieces that have been removed from board.
+    #dictOfRemainingPieces = {}
     listOfRemainingPieces = []
     pass
 
-def search():
-    pass
+class Moves:        
+    def markKnightMove(listOfPos):
+        for pos in listOfPos:
+            (x,y) = chessPosToArr(pos)
+            InitParams.dictOfObsOnBoard[pos] = -1
+            #Board.board[y][x] = -1
+            Moves.markTopRight(x+2, y+1, 1)
+            Moves.markTopRight(x+1, y+2, 1)
+            Moves.markTopRight(x-2, y+1, 1)
+            Moves.markTopRight(x-1, y+2, 1)
+            Moves.markTopRight(x-2, y-1, 1)
+            Moves.markTopRight(x-1, y-2, 1)
+            Moves.markTopRight(x+2, y-1, 1)
+            Moves.markTopRight(x+1, y-2, 1)
+            
+    def markRookMove(listOfPos):
+        for pos in listOfPos:
+            (x,y) = chessPosToArr(pos)
+            InitParams.dictOfObsOnBoard[pos] = -1
+            Moves.markUp(x,y+1,-1)
+            Moves.markDown(x, y-1, -1)
+            Moves.markLeft(x-1, y, -1)
+            Moves.markRight(x+1, y, -1)
+            #Board.board[y][x] = -1
+    
+    def markBishopMove(listOfPos):
+        for pos in listOfPos:
+            InitParams.dictOfObsOnBoard[pos] = -1
+            (x,y) = chessPosToArr(pos)
+            Moves.markTopRight(x+1, y+1, -1)
+            Moves.markTopLeft(x-1, y+1, -1)
+            Moves.markBotRight(x+1, y-1, -1)
+            Moves.markBotLeft(x-1, y-1, -1)
+            #Board.board[y][x] = -1
+            
+    def markQueenMove(listOfPos):
+        for pos in listOfPos:
+            (x,y) = chessPosToArr(pos)
+            InitParams.dictOfObsOnBoard[pos] = -1
+            Moves.markUp(x, y+1, -1)
+            Moves.markDown(x, y-1, -1)
+            Moves.markLeft(x-1, y, -1)
+            Moves.markRight(x+1, y, -1)
+            Moves.markTopRight(x+1, y+1, -1)
+            Moves.markTopLeft(x-1, y+1, -1)
+            Moves.markBotRight(x+1, y-1, -1)
+            Moves.markBotLeft(x-1, y-1, -1)
+            #Board.board[y][x] = -1
+    
+    def markKingMove(listOfPos):
+        for pos in listOfPos:
+            InitParams.dictOfObsOnBoard[pos] = -1
+            (x,y) = chessPosToArr(pos)
+            Moves.markUp(x, y+1, 1)
+            Moves.markDown(x, y-1, 1)
+            Moves.markLeft(x-1, y, 1)
+            Moves.markRight(x+1, y, 1)
+            Moves.markTopRight(x+1, y+1, 1)
+            Moves.markTopLeft(x-1, y+1, 1)
+            Moves.markBotRight(x+1, y-1, 1)
+            Moves.markBotLeft(x-1, y-1, 1)
+            #Board.board[y][x] = -1
+    
+    def markUp(x, y, numOfMoves):
+        maxRow = InitParams.rows - 1
+        pos = arrToChessPos(x,y)
+        if (y > maxRow or y < 0 or numOfMoves == 0 or InitParams.dictOfObsOnBoard.get(pos,0) == -1):
+            return
+        InitParams.dictOfObsOnBoard[pos] = -2
+        numOfMoves-=1
+        Moves.markUp(x, y+1, numOfMoves)
+
+    def markDown(x, y, numOfMoves):
+        maxRow = InitParams.rows - 1
+        pos = arrToChessPos(x,y)
+        if (y > maxRow or y < 0 or numOfMoves == 0 or InitParams.dictOfObsOnBoard.get(pos,0) == -1):
+            return
+        InitParams.dictOfObsOnBoard[pos] = -2
+        numOfMoves-=1
+        Moves.markDown(x, y-1, numOfMoves)
+
+    def markLeft(x, y, numOfMoves):
+        maxCol = InitParams.cols - 1
+        pos = arrToChessPos(x,y)
+        if (x > maxCol or x < 0 or numOfMoves == 0 or InitParams.dictOfObsOnBoard.get(pos,0) == -1):
+            return
+        InitParams.dictOfObsOnBoard[pos] = -2
+        numOfMoves-=1
+        Moves.markLeft(x-1, y, numOfMoves)
+
+    def markRight(x, y, numOfMoves):
+        maxCol = InitParams.cols - 1
+        pos = arrToChessPos(x,y)
+        if (x > maxCol or x < 0 or numOfMoves == 0 or InitParams.dictOfObsOnBoard.get(pos,0) == -1):
+            return
+        InitParams.dictOfObsOnBoard[pos] = -2
+        numOfMoves-=1
+        Moves.markRight(x+1, y, numOfMoves)
+
+    def markTopRight(x, y, numOfMoves):
+        maxCol = InitParams.cols - 1
+        maxRow = InitParams.rows - 1
+        pos = arrToChessPos(x,y)
+        if (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or InitParams.dictOfObsOnBoard.get(pos,0) == -1):
+            return
+        InitParams.dictOfObsOnBoard[pos] = -2
+        numOfMoves-=1
+        Moves.markTopRight(x+1, y+1, numOfMoves)
+
+    def markTopLeft(x, y, numOfMoves):
+        maxCol = InitParams.cols - 1
+        maxRow = InitParams.rows - 1
+        pos = arrToChessPos(x,y)
+        if (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or InitParams.dictOfObsOnBoard.get(pos,0) == -1):
+            return
+        InitParams.dictOfObsOnBoard[pos] = -2
+        numOfMoves-=1
+        Moves.markTopLeft(x-1, y+1, numOfMoves)
+
+    def markBotRight(x, y, numOfMoves):
+        maxCol = InitParams.cols - 1
+        maxRow = InitParams.rows - 1
+        pos = arrToChessPos(x,y)
+        if (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or InitParams.dictOfObsOnBoard.get(pos,0) == -1):
+            return
+        InitParams.dictOfObsOnBoard[pos] = -2
+        numOfMoves-=1
+        Moves.markBotRight(x+1, y-1, numOfMoves)
+
+    def markBotLeft(x, y, numOfMoves):
+        maxCol = InitParams.cols - 1
+        maxRow = InitParams.rows - 1
+        pos = arrToChessPos(x,y)
+        if (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or InitParams.dictOfObsOnBoard.get(pos,0) == -1):
+            return
+        InitParams.dictOfObsOnBoard[pos] = -2
+        numOfMoves-=1
+        Moves.markBotLeft(x-1, y-1, numOfMoves)
 
 ### DO NOT EDIT/REMOVE THE FUNCTION HEADER BELOW###
 # To return: Goal State which is a dictionary containing a mapping of the position of the grid to the chess piece type.
@@ -37,9 +176,34 @@ def run_CSP():
     testfile = sys.argv[1] #Do not remove. This is your input testfile.
     fileText = open(testfile, 'r')
     read_input(fileText)
+    Board.maxCols = InitParams.cols - 1
+    Board.maxRows = InitParams.rows - 1
+    search()
     #goalState = search()
     #return goalState #Format to be returned
     return
+
+def search(row, col, dictOfCurBoard, dictOfObs, dictOfPieces, listOfRemainingPieces):
+    curCol = col
+    curRow = row
+    if (col > Board.maxCols): # Move to next row.
+        curCol = 0
+        curRow+=1
+    if (row > Board.maxRows): # Totally out of board
+        return
+    pos = arrToChessPos(col, row)
+    
+    if (pos in dictOfObs): #if position is blocked/threat
+        search(curRow, curCol, dictOfCurBoard, dictOfObs, dictOfPieces, listOfRemainingPieces)
+    
+    nameOfPiece = listOfRemainingPieces.pop() # Get a piece
+    isValidPlace = 0
+
+    pass
+
+def checkAndPlacePiece(piece):
+    
+    pass
 
 def read_input(f):
     lineState = 0
@@ -114,5 +278,19 @@ def fillListOfPieces(king, queen, bishop, rook, knight):
         Board.listOfRemainingPieces.append("Bishop")
     for x in range(queen):
         Board.listOfRemainingPieces.append("Queen")
-        
+
+# Converts chess coordinate to X,Y
+def chessPosToArr(pos) -> tuple:
+    x = ord(pos[0]) - ord('a')
+    y = int(pos[1:])
+    return (x,y)
+
+# Converts X,Y to chess coords
+def arrToChessPos(x, y):
+    ch = chr(x + ord('a'))
+    return ch + str(y)
+
+def intToChar(curInt):
+    return chr(curInt + ord('a'))
+
 run_CSP()
