@@ -1,4 +1,6 @@
 import copy
+import heapq
+import heapq
 import sys
 
 ### IMPORTANT: Remove any print() functions or rename any print functions/variables/string when submitting on CodePost
@@ -60,7 +62,7 @@ class Moves:
             or Moves.markRight(x+1, y, -1, dictOfCurBoard) or Moves.markTopRight(x+1, y+1, -1, dictOfCurBoard) or Moves.markTopLeft(x-1, y+1, -1, dictOfCurBoard)
             or Moves.markBotRight(x+1, y-1, -1, dictOfCurBoard) or Moves.markBotLeft(x-1, y-1, -1, dictOfCurBoard)):
             return True
-    
+
     def markKingMove(pos, dictOfCurBoard):
         dictOfCurBoard[pos] = -1
         (x,y) = chessPosToArr(pos)
@@ -175,7 +177,7 @@ def run_CSP():
     Board.maxCols = InitParams.cols - 1
     Board.maxRows = InitParams.rows - 1
     dictOfCurBoard = InitParams.dictOfObsOnBoard
-    search(0, 0, dictOfCurBoard, Board.dictOfPieces, Board.countDict)#Board.dictOfNumberOfPiece)
+    newSearch(dictOfCurBoard, Board.dictOfPieces, Board.countDict)
     return Board.dictOfPieces
 
 def getNumOfPiece(name, dict):
@@ -186,49 +188,137 @@ def getNumOfPiece(name, dict):
             counter+=1
     return counter
     
+def newSearch(dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece):
+        if (len(dictOfPieces) == InitParams.totalOwnPiece): #Goal check.
+            Board.dictOfPieces = dictOfPieces
+            return True
+        
+        curPos = getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPiece)
+        if (curPos == -1):
+            return False #No more piece to put.
+            
+        pqOfPiece = getLeastConstrainValueVar(curPos, dictOfCurBoard)
+        trialBoard = copy.copy(dictOfCurBoard)
+        trialDictOfPieces = copy.copy(dictOfPieces)
+        trialDictOfNumberOfPieces = copy.copy(dictOfNumberOfPiece)
+        while (len(pqOfPiece) > 0):
+            (val,curPc) = heapq.heappop(pqOfPiece)
+            hasFailed = checkAndPlacePiece(curPc, curPos, trialBoard)
+            if (not hasFailed):
+                # Successful place
+                curTuple = (curPos[0], int(curPos[1:]))
+                trialDictOfPieces[curTuple] = curPc
+                trialDictOfNumberOfPieces[curPos] = curPc
+                result = newSearch(trialBoard, trialDictOfPieces, trialDictOfNumberOfPieces)
+                if (result):
+                    return True
+                else:
+                    trialBoard = copy.copy(dictOfCurBoard)
+                    trialDictOfPieces = copy.copy(dictOfPieces)
+                    trialDictOfNumberOfPieces = copy.copy(dictOfNumberOfPiece)
+        # All options failed
+        trialBoard[curPos] = 5 # 5 to means must be empty
+        return newSearch(trialBoard, dictOfPieces, dictOfNumberOfPiece)
 
-def search(row, col, dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece):
-    curCol = col
-    curRow = row
-    if (len(dictOfPieces) == InitParams.totalOwnPiece):
-        Board.dictOfPieces = dictOfPieces
-        return True
-    if (col >= Board.maxCols): # Move to next row.
-        curCol = 0
-        curRow+=1
-    if (row > Board.maxRows): # Totally out of board
-        return False
-    
-    pos = arrToChessPos(col, row)
-    if (pos in dictOfCurBoard): #if position is blocked/threat
-        return search(curRow, curCol + 1, dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece)
-
+def getLeastConstrainValueVar(pos, dictOfCurBoard):
+    curSpotLeft = 0
+    listOfPc = []
+    heapq.heapify(listOfPc)
     trialBoard = copy.copy(dictOfCurBoard)
-    trialDictOfPieces = copy.copy(dictOfPieces)
-    trialDictOfNumberOfPieces = copy.copy(dictOfNumberOfPiece)
-    for nameOfPiece in Board.listOfRemainingPieces:
-        #if (len(dictOfNumberOfPiece.get(nameOfPiece)) >= Board.dictOfMaxPiece.get(nameOfPiece)):
-        if (getNumOfPiece(nameOfPiece,trialDictOfNumberOfPieces) >= Board.dictOfMaxPiece.get(nameOfPiece)): #Check if num of piece has reached the max count
-            continue
-        isNotValidPlace = checkAndPlacePiece(nameOfPiece, pos, trialBoard)
-        if (not isNotValidPlace):
-            #Is a valid place
-            curTuple = (pos[0], int(pos[1:]))
-            trialDictOfPieces[curTuple] = nameOfPiece
-            trialDictOfNumberOfPieces[pos] = nameOfPiece
-            #numDict = trialDictOfNumberOfPieces.get(nameOfPiece)
-            #numDict[pos] = nameOfPiece
-            #trialDictOfNumberOfPieces[nameOfPiece] = numDict
-            print(trialBoard)
-            print(trialDictOfPieces)
-            result = search(curRow, curCol + 1, trialBoard, trialDictOfPieces, trialDictOfNumberOfPieces)
-            if (result):
-                return True
-            else:
-                trialBoard = copy.copy(dictOfCurBoard)
-                trialDictOfPieces = copy.copy(dictOfPieces)
-                trialDictOfNumberOfPieces = copy.copy(dictOfNumberOfPiece)
-    return search(curRow, curCol + 1, dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece)
+    for nameOfPc in Board.listOfRemainingPieces:
+        if (not checkAndPlacePiece(nameOfPc, pos, trialBoard)):
+            curSpotLeft = len(trialBoard)
+            node = (curSpotLeft,nameOfPc)
+            heapq.heappush(listOfPc,node)
+    return listOfPc
+        
+def getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPieces):
+    count = 0
+    minCount = 99999
+    x = 0
+    y = 0
+    listOfPos = []
+    while(y <= Board.maxCols):
+        pos = arrToChessPos(x, y)
+        for nameOfPiece in Board.listOfRemainingPieces:
+            trialBoard = copy.copy(dictOfCurBoard)
+            if (pos in dictOfCurBoard): #if position is blocked/threat (5 means allocated as empty)
+                continue
+            if (getNumOfPiece(nameOfPiece,dictOfNumberOfPieces) >= Board.dictOfMaxPiece.get(nameOfPiece)): #Check if num of piece has reached the max count
+                continue
+            isNotValidPlace = checkAndPlacePiece(nameOfPiece, pos, trialBoard)
+            if (not isNotValidPlace):
+                count+=1
+        if (count == minCount):
+            listOfPos.append(pos)
+        elif (count < minCount and count > 0):
+            listOfPos = []
+            minCount = count
+            listOfPos.append(pos)
+        x+=1
+        if (x > Board.maxCols):
+            x = 0
+            y+=1
+        count = 0
+
+    degree = 0
+    maxDegree = 0
+    finPos = []
+    # Max Degree Heuristic
+    for curPos in listOfPos:
+        (x,y) = chessPosToArr(curPos)
+        if (x + 1 <= Board.maxCols):
+            incPos = arrToChessPos(x+1, y)
+            val = dictOfCurBoard.get(incPos,0)
+            if (not val == -3):
+                degree+=1
+        if (x + 1 <= Board.maxCols and y + 1 <= Board.maxRows):
+            incPos = arrToChessPos(x+1, y+1)
+            val = dictOfCurBoard.get(incPos,0)
+            if (not val == -3):
+                degree+=1
+        if (y + 1 <= Board.maxRows):
+            incPos = arrToChessPos(x, y+1)
+            val = dictOfCurBoard.get(incPos,0)
+            if (not val == -3):
+                degree+=1
+        if (x - 1 >= 0 and y + 1 <= Board.maxRows):
+            incPos = arrToChessPos(x-1, y+1)
+            val = dictOfCurBoard.get(incPos,0)
+            if (not val == -3):
+                degree+=1
+        if (x - 1 >= 0):
+            incPos = arrToChessPos(x-1, y)
+            val = dictOfCurBoard.get(incPos,0)
+            if (not val == -3):
+                degree+=1
+        if (x - 1 >= 0 and y - 1 >= 0):
+            incPos = arrToChessPos(x-1, y-1)
+            val = dictOfCurBoard.get(incPos,0)
+            if (not val == -3):
+                degree+=1
+        if (y - 1 >= 0):
+            incPos = arrToChessPos(x, y-1)
+            val = dictOfCurBoard.get(incPos,0)
+            if (not val == -3):
+                degree+=1
+        if (x + 1 <= Board.maxCols and y - 1 >= 0):
+            incPos = arrToChessPos(x+1, y-1)
+            val = dictOfCurBoard.get(incPos,0)
+            if (not val == -3):
+                degree+=1
+        if (degree > maxDegree):
+            maxDegree = degree
+            finPos = []
+            finPos.append(curPos)
+        elif (degree == maxDegree and degree != 0):
+            finPos.append(curPos)
+        degree = 0
+    
+    if (len(finPos) == 0):
+        return -1
+
+    return finPos.pop()
 
 def checkAndPlacePiece(piece, pos, dictOfCurBoard):
     status = False #True means is not valid place.
@@ -307,17 +397,16 @@ def getNumerOfEnemyOrOwn(string) -> int:
     return count
 
 def fillListOfPieces():
-    if (Board.dictOfMaxPiece.get("Queen") > 0):
-        Board.listOfRemainingPieces.append("Queen")
-    if (Board.dictOfMaxPiece.get("Rook") > 0):
-        Board.listOfRemainingPieces.append("Rook")
-    if (Board.dictOfMaxPiece.get("Bishop") > 0):
-        Board.listOfRemainingPieces.append("Bishop")
     if (Board.dictOfMaxPiece.get("King") > 0):
         Board.listOfRemainingPieces.append("King")
     if (Board.dictOfMaxPiece.get("Knight") > 0):
         Board.listOfRemainingPieces.append("Knight")
-
+    if (Board.dictOfMaxPiece.get("Rook") > 0):
+        Board.listOfRemainingPieces.append("Rook")
+    if (Board.dictOfMaxPiece.get("Bishop") > 0):
+        Board.listOfRemainingPieces.append("Bishop")
+    if (Board.dictOfMaxPiece.get("Queen") > 0):
+        Board.listOfRemainingPieces.append("Queen")
 
 # Converts chess coordinate to X,Y
 def chessPosToArr(pos) -> tuple:
@@ -333,4 +422,4 @@ def arrToChessPos(x, y):
 def intToChar(curInt):
     return chr(curInt + ord('a'))
 
-print(run_CSP())
+#print(run_CSP())
