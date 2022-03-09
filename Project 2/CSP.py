@@ -208,7 +208,7 @@ def search(row, col, dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece):
     trialDictOfNumberOfPieces = copy.copy(dictOfNumberOfPiece)
     for nameOfPiece in Board.listOfRemainingPieces:
         #if (len(dictOfNumberOfPiece.get(nameOfPiece)) >= Board.dictOfMaxPiece.get(nameOfPiece)):
-        if (getNumOfPiece(nameOfPiece,trialDictOfNumberOfPieces) >= Board.dictOfMaxPiece.get(nameOfPiece)):
+        if (getNumOfPiece(nameOfPiece,trialDictOfNumberOfPieces) >= Board.dictOfMaxPiece.get(nameOfPiece)): #Check if num of piece has reached the max count
             continue
         isNotValidPlace = checkAndPlacePiece(nameOfPiece, pos, trialBoard)
         if (not isNotValidPlace):
@@ -219,10 +219,15 @@ def search(row, col, dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece):
             #numDict = trialDictOfNumberOfPieces.get(nameOfPiece)
             #numDict[pos] = nameOfPiece
             #trialDictOfNumberOfPieces[nameOfPiece] = numDict
-            #print(trialDictOfPieces)
+            print(trialBoard)
+            print(trialDictOfPieces)
             result = search(curRow, curCol + 1, trialBoard, trialDictOfPieces, trialDictOfNumberOfPieces)
             if (result):
                 return True
+            else:
+                trialBoard = copy.copy(dictOfCurBoard)
+                trialDictOfPieces = copy.copy(dictOfPieces)
+                trialDictOfNumberOfPieces = copy.copy(dictOfNumberOfPiece)
     return search(curRow, curCol + 1, dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece)
 
 def checkAndPlacePiece(piece, pos, dictOfCurBoard):
@@ -232,11 +237,11 @@ def checkAndPlacePiece(piece, pos, dictOfCurBoard):
     elif (piece == "Knight"):
         status = Moves.markKnightMove(pos,dictOfCurBoard)
     elif (piece == "Rook"):
-        status == Moves.markRookMove(pos, dictOfCurBoard)
+        status = Moves.markRookMove(pos, dictOfCurBoard)
     elif (piece == "Bishop"):
-        status == Moves.markBishopMove(pos,dictOfCurBoard)
+        status = Moves.markBishopMove(pos,dictOfCurBoard)
     elif (piece == "Queen"):
-        status == Moves.markQueenMove(pos, dictOfCurBoard)
+        status = Moves.markQueenMove(pos, dictOfCurBoard)
     return status
 
 def read_input(f):
@@ -302,16 +307,17 @@ def getNumerOfEnemyOrOwn(string) -> int:
     return count
 
 def fillListOfPieces():
-    if (Board.dictOfMaxPiece.get("King") > 0):
-        Board.listOfRemainingPieces.append("King")
-    if (Board.dictOfMaxPiece.get("Knight") > 0):
-        Board.listOfRemainingPieces.append("Knight")
+    if (Board.dictOfMaxPiece.get("Queen") > 0):
+        Board.listOfRemainingPieces.append("Queen")
     if (Board.dictOfMaxPiece.get("Rook") > 0):
         Board.listOfRemainingPieces.append("Rook")
     if (Board.dictOfMaxPiece.get("Bishop") > 0):
         Board.listOfRemainingPieces.append("Bishop")
-    if (Board.dictOfMaxPiece.get("Queen") > 0):
-        Board.listOfRemainingPieces.append("Queen")
+    if (Board.dictOfMaxPiece.get("King") > 0):
+        Board.listOfRemainingPieces.append("King")
+    if (Board.dictOfMaxPiece.get("Knight") > 0):
+        Board.listOfRemainingPieces.append("Knight")
+
 
 # Converts chess coordinate to X,Y
 def chessPosToArr(pos) -> tuple:
