@@ -1,6 +1,7 @@
 import copy
 import heapq
 import heapq
+from opcode import hasfree
 import sys
 
 ### IMPORTANT: Remove any print() functions or rename any print functions/variables/string when submitting on CodePost
@@ -193,23 +194,28 @@ def newSearch(dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece):
             Board.dictOfPieces = dictOfPieces
             return True
         
-        curPos = getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPiece)
-        if (curPos == -1):
+        data = getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPiece)
+        if (data == -1):
             return False #No more piece to put.
-            
+        (curPos, ls) = data
+
+        
         pqOfPiece = getLeastConstrainValueVar(curPos, dictOfCurBoard)
         trialBoard = copy.copy(dictOfCurBoard)
         trialDictOfPieces = copy.copy(dictOfPieces)
         trialDictOfNumberOfPieces = copy.copy(dictOfNumberOfPiece)
         while (len(pqOfPiece) > 0):
-            (val,curPc) = heapq.heappop(pqOfPiece)
-            hasFailed = checkAndPlacePiece(curPc, curPos, trialBoard)
+            #(val,curPc) = heapq.heappop(pqOfPiece)
+            #hasFailed = checkAndPlacePiece(curPc, curPos, trialBoard)
+            hasFailed = False
+            (val,data) = heapq.heappop(pqOfPiece)
+            (curPc, trialB) = data
             if (not hasFailed):
                 # Successful place
                 curTuple = (curPos[0], int(curPos[1:]))
                 trialDictOfPieces[curTuple] = curPc
                 trialDictOfNumberOfPieces[curPos] = curPc
-                result = newSearch(trialBoard, trialDictOfPieces, trialDictOfNumberOfPieces)
+                result = newSearch(trialB, trialDictOfPieces, trialDictOfNumberOfPieces) #change trialB to trial board
                 if (result):
                     return True
                 else:
@@ -228,8 +234,11 @@ def getLeastConstrainValueVar(pos, dictOfCurBoard):
     for nameOfPc in Board.listOfRemainingPieces:
         if (not checkAndPlacePiece(nameOfPc, pos, trialBoard)):
             curSpotLeft = len(trialBoard)
-            node = (curSpotLeft,nameOfPc)
+            #node = (curSpotLeft, nameOfPc)
+            data = (nameOfPc,trialBoard)
+            node = (curSpotLeft,data)
             heapq.heappush(listOfPc,node)
+        trialBoard = copy.copy(dictOfCurBoard)
     return listOfPc
         
 def getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPieces):
@@ -238,23 +247,39 @@ def getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPieces):
     x = 0
     y = 0
     listOfPos = []
+    dictOfSumOfPiece = {}
+    for nameOfPiece in Board.listOfRemainingPieces: #Calc the current number of pieces on board
+        val = getNumOfPiece(nameOfPiece,dictOfNumberOfPieces)
+        dictOfSumOfPiece[nameOfPiece] = val
+
     while(y <= Board.maxCols):
         pos = arrToChessPos(x, y)
+
+        #Portion for LCV
+        curSpotLeft = 0
+        listOfPc = []
+        heapq.heapify(listOfPc)
+
         for nameOfPiece in Board.listOfRemainingPieces:
             trialBoard = copy.copy(dictOfCurBoard)
             if (pos in dictOfCurBoard): #if position is blocked/threat (5 means allocated as empty)
                 continue
-            if (getNumOfPiece(nameOfPiece,dictOfNumberOfPieces) >= Board.dictOfMaxPiece.get(nameOfPiece)): #Check if num of piece has reached the max count
+            if (dictOfSumOfPiece.get(nameOfPiece) >= Board.dictOfMaxPiece.get(nameOfPiece)): #Check if num of piece has reached the max count
                 continue
             isNotValidPlace = checkAndPlacePiece(nameOfPiece, pos, trialBoard)
             if (not isNotValidPlace):
                 count+=1
+                #Portion for LCV
+                curSpotLeft = len(trialBoard)
+                data = (nameOfPiece,trialBoard)
+                node = (curSpotLeft,data)
+                heapq.heappush(listOfPc,node)
         if (count == minCount):
-            listOfPos.append(pos)
+            listOfPos.append((pos,listOfPc))
         elif (count < minCount and count > 0):
             listOfPos = []
             minCount = count
-            listOfPos.append(pos)
+            listOfPos.append((pos,listOfPc))
         x+=1
         if (x > Board.maxCols):
             x = 0
@@ -265,7 +290,8 @@ def getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPieces):
     maxDegree = 0
     finPos = []
     # Max Degree Heuristic
-    for curPos in listOfPos:
+    for cur in listOfPos:
+        (curPos, ls) = cur 
         (x,y) = chessPosToArr(curPos)
         if (x + 1 <= Board.maxCols):
             incPos = arrToChessPos(x+1, y)
@@ -310,9 +336,9 @@ def getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPieces):
         if (degree > maxDegree):
             maxDegree = degree
             finPos = []
-            finPos.append(curPos)
+            finPos.append((curPos,ls))
         elif (degree == maxDegree and degree != 0):
-            finPos.append(curPos)
+            finPos.append((curPos,ls))
         degree = 0
     
     if (len(finPos) == 0):
@@ -367,7 +393,7 @@ def getRowOrColOrObs(string) -> int:
         val = int(string[idx:])
     except Exception:
         #print("Error in geting Row/Col/# of obs")
-        sys.exit()    
+        sys.exit()
     return val
 
 #Returns list of Obj Pos in a list
