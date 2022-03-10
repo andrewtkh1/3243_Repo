@@ -206,7 +206,7 @@ def search(dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece):
     trialDictOfPieces = copy.copy(dictOfPieces)
     trialDictOfNumberOfPieces = copy.copy(dictOfNumberOfPiece)
     
-    #lsOfSpots = getLeastConstrainValueVar(nameOfPiece, dictOfCurBoard)
+    #lsOfSpots = getLeastConstrainValueVar(nameOfPiece, dictOfCurBoard) #This line is to get Least Const value. Not necessary as alr done in leastRemainingValuePos function.
     
     while (len(lsOfSpots) > 0):
         vertex = heapq.heappop(lsOfSpots)
