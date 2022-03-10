@@ -1,11 +1,7 @@
 import copy
-from doctest import master
 import heapq
 import heapq
-from opcode import hasfree
 import sys
-
-from numpy import DataSource
 
 ### IMPORTANT: Remove any print() functions or rename any print functions/variables/string when submitting on CodePost
 ### The autograder will not run if it detects any print function.
@@ -202,13 +198,20 @@ def newSearch(dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece):
         masterPQ = getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPiece)
         if (masterPQ == -1):
             return False #No more piece to put.
-        while (len(masterPQ) > 0):
+        
+        curNumOfPc = 0
+        
+        for nameOfPiece in Board.listOfRemainingPieces: #Calc the current number of pieces on board
+            curNumOfPc = curNumOfPc + getNumOfPiece(nameOfPiece,dictOfNumberOfPiece)
+        
+        while (len(masterPQ) > 0 and len(masterPQ) >= InitParams.totalOwnPiece - curNumOfPc):
+            
             datas = heapq.heappop(masterPQ)
             (count, deg, packet) = datas
-            (curPos, pqOfPieces) = packet
+            (curPos, pqOfPiece) = packet
             #(curPos, pqOfPieces) = datas
 
-            pqOfPiece = getLeastConstrainValueVar(curPos, dictOfCurBoard, dictOfNumberOfPiece)
+            #pqOfPiece = getLeastConstrainValueVar(curPos, dictOfCurBoard, dictOfNumberOfPiece)
             trialBoard = copy.copy(dictOfCurBoard)
             trialDictOfPieces = copy.copy(dictOfPieces)
             trialDictOfNumberOfPieces = copy.copy(dictOfNumberOfPiece)
@@ -231,8 +234,8 @@ def newSearch(dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece):
                         trialBoard = copy.copy(dictOfCurBoard)
                         trialDictOfPieces = copy.copy(dictOfPieces)
                         trialDictOfNumberOfPieces = copy.copy(dictOfNumberOfPiece)
-            # All options failed
-            trialBoard[curPos] = 5 # 5 to means must be empty
+                # All options failed
+                trialBoard[curPos] = 5 # 5 to means must be empty
         return #newSearch(trialBoard, dictOfPieces, dictOfNumberOfPiece)
 
 def getLeastConstrainValueVar(pos, dictOfCurBoard, dictOfNumberOfPieces):
