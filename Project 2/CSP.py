@@ -18,7 +18,7 @@ class InitParams:
     dictOfObsOnBoard = {}
 
 class Board:
-    dictOfPriority = {'King': 2, 'Queen':0, 'Bishop': 1, 'Rook': 1, 'Knight': 2}
+    dictOfPriority = {'King': 4, 'Queen':0, 'Bishop': 2, 'Rook': 1, 'Knight': 3}
     maxRows = 0
     maxCols = 0
     totalThreat = 0
@@ -193,7 +193,7 @@ def search(dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece):
     
     if (len(dictOfPieces) == InitParams.totalOwnPiece): #Goal check.
         Board.dictOfPieces = dictOfPieces
-        return True    
+        return True
     
     lsOfSpots = []
     heapq.heapify(lsOfSpots)
@@ -207,7 +207,7 @@ def search(dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece):
     trialDictOfNumberOfPieces = copy.copy(dictOfNumberOfPiece)
     
     #lsOfSpots = getLeastConstrainValueVar(nameOfPiece, dictOfCurBoard) #This line is to get Least Const value. Not necessary as alr done in leastRemainingValuePos function.
-    
+    #print(lsOfSpots)
     while (len(lsOfSpots) > 0):
         vertex = heapq.heappop(lsOfSpots)
         (numOfPosBlocked, node) = vertex
@@ -253,19 +253,17 @@ def getLeastConstrainValueVar(piece, dictOfCurBoard):
             y+=1
         trialBoard = copy.copy(dictOfCurBoard)
     return listOfPc
-        
 
 # Changed to piece. For each piece, calc how many spots on the board is valid for it. Get piece with the min.
 # Return (numOfPositionsValid, Board.dictOfPriority.get(uniquePiece), (uniquePiece, listOfSpots))
 # lsOfSpots is =  node = (numOfPosBlocked,data), data = (pos,trialBoard)
 def getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPieces):
     numOfPositionsValid = 0
-    minNumOfPositionsValid = 99999
-
     listOfPcs = []
     heapq.heapify(listOfPcs)
     dictOfSumOfPiece = {}
     dictOfDistinctPiece = {}
+    
     
     for nameOfPiece in Board.listOfRemainingPieces: #Calc the current number of pieces on board
         val = getNumOfPiece(nameOfPiece,dictOfNumberOfPieces)
@@ -273,10 +271,12 @@ def getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPieces):
             dictOfDistinctPiece[nameOfPiece] = -1
         dictOfSumOfPiece[nameOfPiece] = val
         
-    for uniquePiece in dictOfDistinctPiece:
+    uniquePcSum = len(dictOfSumOfPiece)
+    ls = ["Queen", "Rook", "Bishop", "Knight", "King"]
+    for uniquePiece in dictOfSumOfPiece:
         x = 0
         y = 0
-        if (dictOfSumOfPiece.get(uniquePiece) >= Board.dictOfMaxPiece.get(uniquePiece)): #Check if num of piece has reached the max count
+        if (dictOfSumOfPiece.get(uniquePiece,0) >= Board.dictOfMaxPiece.get(uniquePiece,0)): #Check if num of piece has reached the max count
             continue
         listOfSpots = []
         heapq.heapify(listOfSpots)
@@ -302,13 +302,14 @@ def getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPieces):
             if (x > Board.maxCols):
                 x = 0
                 y+=1
-                
+        if (numOfPositionsValid == 0):
+            return -1        
         if (numOfPositionsValid > 0):
                 # Priority is for max degree Heuristic.
                 heapq.heappush(listOfPcs,(numOfPositionsValid,Board.dictOfPriority.get(uniquePiece),(uniquePiece,listOfSpots))) #count must be min        
         numOfPositionsValid = 0
     if (len(listOfPcs) == 0):
-        return -1
+         return -1
     return heapq.heappop(listOfPcs)
 
 def checkAndPlacePiece(piece, pos, dictOfCurBoard):

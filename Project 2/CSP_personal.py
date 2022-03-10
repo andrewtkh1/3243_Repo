@@ -502,14 +502,14 @@ class Piece:
             #backtrack = True
         #return backtrack
 
-def loadimages():
-    images["K"] = p.image.load("images/bK.png")
-    images["Q"] = p.image.load("images/bQ.png")
-    images["B"] = p.image.load("images/bB.png")
-    images["R"] = p.image.load("images/bR.png")
-    images["k"] = p.image.load("images/bN.png")
-    images["X"] = p.image.load("images/obstacle.png")
-    images["T"] = p.image.load("images/threaten.png")
+#def loadimages():
+    #images["K"] = p.image.load("images/bK.png")
+    #images["Q"] = p.image.load("images/bQ.png")
+    #images["B"] = p.image.load("images/bB.png")
+   # images["R"] = p.image.load("images/bR.png")
+    #images["k"] = p.image.load("images/bN.png")
+  #  images["X"] = p.image.load("images/obstacle.png")
+  #  images["T"] = p.image.load("images/threaten.png")
 ### DO NOT EDIT/REMOVE THE FUNCTION HEADER BELOW###
 # To return: Goal State which is a dictionary containing a mapping of the position of the grid to the chess piece type.
 # Chess Pieces: King, Queen, Knight, Bishop, Rook (First letter capitalized)
@@ -518,7 +518,7 @@ def loadimages():
 # Goal State to return example: {('a', 0) : Queen, ('d', 10) : Knight, ('g', 25) : Rook}
 def run_CSP():
     # You can code in here but you cannot remove this function or change the return type
-    file = open("info.txt", "r") #Do not remove. This is your input testfile.
+    file = open(sys.argv[1], "r") #Do not remove. This is your input testfile.
     lines = file.readlines()
     file.close()  #Close text file
     global norows
@@ -577,5 +577,5 @@ def run_CSP():
 p.init()
 clock = p.time.Clock()
 images = {}
-loadimages()
+#loadimages()
 run_CSP()
