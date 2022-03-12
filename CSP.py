@@ -2,10 +2,10 @@ import copy
 import heapq
 import heapq
 import sys
-
+ 
 ### IMPORTANT: Remove any print() functions or rename any print functions/variables/string when submitting on CodePost
 ### The autograder will not run if it detects any print function.
-
+ 
 class InitParams:
     # Class level var
     rows = 0
@@ -16,11 +16,8 @@ class InitParams:
     kValue = 10
     dictOfOwnPos = {'King': [], 'Queen':[], 'Bishop': [], 'Rook': [], 'Knight': []}
     dictOfObsOnBoard = {}
-
+ 
 class Board:
-    samePieceFlag = 0
-    samePieceDict = []
-    dictOfPriority = {'King': 4, 'Queen':0, 'Bishop': 2, 'Rook': 1, 'Knight': 3}
     maxRows = 0
     maxCols = 0
     totalThreat = 0
@@ -34,7 +31,7 @@ class Board:
     countDict = {}
     listOfRemainingPieces = []
     isValid = 0
-
+ 
 class Moves:        
     def markKnightMove(pos, dictOfCurBoard):
         (x,y) = chessPosToArr(pos)
@@ -65,7 +62,7 @@ class Moves:
             or Moves.markRight(x+1, y, -1, dictOfCurBoard) or Moves.markTopRight(x+1, y+1, -1, dictOfCurBoard) or Moves.markTopLeft(x-1, y+1, -1, dictOfCurBoard)
             or Moves.markBotRight(x+1, y-1, -1, dictOfCurBoard) or Moves.markBotLeft(x-1, y-1, -1, dictOfCurBoard)):
             return True
-
+ 
     def markKingMove(pos, dictOfCurBoard):
         dictOfCurBoard[pos] = -1
         (x,y) = chessPosToArr(pos)
@@ -77,176 +74,100 @@ class Moves:
     def markUp(x, y, numOfMoves, dictOfCurBoard):
         maxRow = InitParams.rows - 1
         pos = arrToChessPos(x,y)
-        while not (y > maxRow or y < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
-            pos = arrToChessPos(x,y)
-            if (dictOfCurBoard.get(pos,0) == -1):
-                return True
-            dictOfCurBoard[pos] = -2
-            numOfMoves-=1
-            y+=1
-        return False
-        pos = arrToChessPos(x,y)
-        if (y > maxRow or y < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3): #-3 is obstacles
-            return False
         if (dictOfCurBoard.get(pos,0) == -1):
             return True
+        if (y > maxRow or y < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
+            return False
         dictOfCurBoard[pos] = -2
         numOfMoves-=1
         return Moves.markUp(x, y+1, numOfMoves, dictOfCurBoard)
-
+ 
     def markDown(x, y, numOfMoves, dictOfCurBoard):
         maxRow = InitParams.rows - 1
         pos = arrToChessPos(x,y)
-        while(not(y > maxRow or y < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3)):
-            pos = arrToChessPos(x,y)
-            if (dictOfCurBoard.get(pos,0) == -1):
-                return True
-            dictOfCurBoard[pos] = -2
-            numOfMoves-=1
-            y-=1
-        return False
-        pos = arrToChessPos(x,y)
-        if (y > maxRow or y < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3) :
-            return False
         if (dictOfCurBoard.get(pos,0) == -1):
             return True
+        if (y > maxRow or y < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3) :
+            return False
         dictOfCurBoard[pos] = -2
         numOfMoves-=1
         return Moves.markDown(x, y-1, numOfMoves, dictOfCurBoard)
-
+ 
     def markLeft(x, y, numOfMoves, dictOfCurBoard):
         maxCol = InitParams.cols - 1
         pos = arrToChessPos(x,y)
-        while not (x > maxCol or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
-            pos = arrToChessPos(x,y)
-            if (dictOfCurBoard.get(pos,0) == -1):
-                return True
-            dictOfCurBoard[pos] = -2
-            numOfMoves-=1
-            x-=1
-        return False
-        pos = arrToChessPos(x,y)
-        if (x > maxCol or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
-            return False
         if (dictOfCurBoard.get(pos,0) == -1):
             return True
+        if (x > maxCol or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
+            return False
         dictOfCurBoard[pos] = -2
         numOfMoves-=1
         return Moves.markLeft(x-1, y, numOfMoves, dictOfCurBoard)
-
+ 
     def markRight(x, y, numOfMoves, dictOfCurBoard):
         maxCol = InitParams.cols - 1
         pos = arrToChessPos(x,y)
-        while not (x > maxCol or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
-            pos = arrToChessPos(x,y)
-            if (dictOfCurBoard.get(pos,0) == -1):
-                return True
-            dictOfCurBoard[pos] = -2
-            numOfMoves-=1
-            x+=1
-        return False
-        pos = arrToChessPos(x,y)
-        if (x > maxCol or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
-            return False
         if (dictOfCurBoard.get(pos,0) == -1):
             return True
+        if (x > maxCol or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
+            return False
         dictOfCurBoard[pos] = -2
         numOfMoves-=1
         return Moves.markRight(x+1, y, numOfMoves, dictOfCurBoard)
-
+ 
     def markTopRight(x, y, numOfMoves, dictOfCurBoard):
         maxCol = InitParams.cols - 1
         maxRow = InitParams.rows - 1
         pos = arrToChessPos(x,y)
-        while not (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
-            pos = arrToChessPos(x,y)
-            if (dictOfCurBoard.get(pos,0) == -1):
-                return True
-            dictOfCurBoard[pos] = -2
-            numOfMoves-=1
-            x+=1
-            y+=1
-        return False
-        pos = arrToChessPos(x,y)
-        if (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
-            return False
         if (dictOfCurBoard.get(pos,0) == -1):
             return True
+        if (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
+            return False
         dictOfCurBoard[pos] = -2
         numOfMoves-=1
         return Moves.markTopRight(x+1, y+1, numOfMoves, dictOfCurBoard)
-
+ 
     def markTopLeft(x, y, numOfMoves, dictOfCurBoard):
         maxCol = InitParams.cols - 1
         maxRow = InitParams.rows - 1
         pos = arrToChessPos(x,y)
-        while not  (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
-            pos = arrToChessPos(x,y)
-            if (dictOfCurBoard.get(pos,0) == -1):
-                return True
-            dictOfCurBoard[pos] = -2
-            numOfMoves-=1
-            x-=1
-            y+=1
-        return False
-        pos = arrToChessPos(x,y)
-        if (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
-            return False
         if (dictOfCurBoard.get(pos,0) == -1):
             return True
+        if (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
+            return False
         dictOfCurBoard[pos] = -2
         numOfMoves-=1
         return Moves.markTopLeft(x-1, y+1, numOfMoves, dictOfCurBoard)
-
+ 
     def markBotRight(x, y, numOfMoves, dictOfCurBoard):
         maxCol = InitParams.cols - 1
         maxRow = InitParams.rows - 1
         pos = arrToChessPos(x,y)
-        while not (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
-            pos = arrToChessPos(x,y)
-            if (dictOfCurBoard.get(pos,0) == -1):
-                return True
-            dictOfCurBoard[pos] = -2
-            numOfMoves-=1
-            x+=1
-            y-=1
-        return False
-        pos = arrToChessPos(x,y)
-        if (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
-            return False
         if (dictOfCurBoard.get(pos,0) == -1):
             return True
+        if (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
+            return False
         dictOfCurBoard[pos] = -2
         numOfMoves-=1
         return Moves.markBotRight(x+1, y-1, numOfMoves, dictOfCurBoard)
-
+ 
     def markBotLeft(x, y, numOfMoves, dictOfCurBoard):
         maxCol = InitParams.cols - 1
         maxRow = InitParams.rows - 1
         pos = arrToChessPos(x,y)
-        while not (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
-            pos = arrToChessPos(x,y)
-            if (dictOfCurBoard.get(pos,0) == -1):
-                return True
-            dictOfCurBoard[pos] = -2
-            numOfMoves-=1
-            x-=1
-            y-=1
-        return False
-        pos = arrToChessPos(x,y)
-        if (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
-            return False
         if (dictOfCurBoard.get(pos,0) == -1):
             return True
+        if (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
+            return False
         dictOfCurBoard[pos] = -2
         numOfMoves-=1
         return Moves.markBotLeft(x-1, y-1, numOfMoves, dictOfCurBoard)
-
+ 
 ### DO NOT EDIT/REMOVE THE FUNCTION HEADER BELOW###
 # To return: Goal State which is a dictionary containing a mapping of the position of the grid to the chess piece type.
 # Chess Pieces: King, Queen, Knight, Bishop, Rook (First letter capitalized)
 # Positions: Tuple. (column (String format), row (Int)). Example: ('a', 0)
-
+ 
 # Goal State to return example: {('a', 0) : Queen, ('d', 10) : Knight, ('g', 25) : Rook}
 def run_CSP():
     # You can code in here but you cannot remove this function or change the return type
@@ -256,9 +177,10 @@ def run_CSP():
     Board.maxCols = InitParams.cols - 1
     Board.maxRows = InitParams.rows - 1
     dictOfCurBoard = InitParams.dictOfObsOnBoard
-    search(dictOfCurBoard, Board.dictOfPieces, Board.countDict)
+    #search(0, 0, dictOfCurBoard, Board.dictOfPieces, Board.countDict)#Board.dictOfNumberOfPiece)
+    newSearch(dictOfCurBoard, Board.dictOfPieces, Board.countDict)
     return Board.dictOfPieces
-
+ 
 def getNumOfPiece(name, dict):
     counter = 0
     for key in dict:
@@ -267,139 +189,152 @@ def getNumOfPiece(name, dict):
             counter+=1
     return counter
     
-def search(dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece):
-    
-    if (len(dictOfPieces) == InitParams.totalOwnPiece): #Goal check.
-        Board.dictOfPieces = dictOfPieces
-        return True
-    
-    numOfRemainPc = InitParams.totalOwnPiece - len(dictOfPieces)
-    totalPos = InitParams.rows * InitParams.cols
-    remainPos = totalPos - len(dictOfCurBoard)
-    
-    if (numOfRemainPc > remainPos): # Number of piece left is more than remaining spots
-        return False
-    
-    lsOfSpots = []
-    heapq.heapify(lsOfSpots)
-        
-    pieceList = getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPiece, dictOfPieces)
-    if (pieceList == -1): #No valid assignment of piece
-        return False
-    (noOfPosValid, priority, data) = pieceList
-    (nameOfPiece, lsOfSpots) = data
-    
-    trialDictOfPieces = copy.copy(dictOfPieces)
-    trialDictOfNumberOfPieces = copy.copy(dictOfNumberOfPiece)
-    
-    #lsOfSpots = getLeastConstrainValueVar(nameOfPiece, dictOfCurBoard) #This line is to get Least Const value. Not necessary as alr done in leastRemainingValuePos function.
-    #print(lsOfSpots)
-    while (len(lsOfSpots) > 0):
-        vertex = heapq.heappop(lsOfSpots)
-        (numOfPosBlocked, node) = vertex
-        (pos, preDoneBoard) = node
-        curTuple = (pos[0], int(pos[1:]))
-        trialDictOfPieces[curTuple] = nameOfPiece #Dict to print
-        trialDictOfNumberOfPieces[pos] = nameOfPiece #Dict to keep track of what pieces are on the board.        
-        #print(trialDictOfPieces)
-        result = search(preDoneBoard, trialDictOfPieces, trialDictOfNumberOfPieces) #change trialB to trial board
-        if (result):
+def newSearch(dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece):
+        if (len(dictOfPieces) == InitParams.totalOwnPiece): #Goal check.
+            Board.dictOfPieces = dictOfPieces
             return True
-        Board.samePieceDict.append(trialDictOfPieces)
+        
+        curPos = getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPiece)
+        if (curPos == -1):
+            return False #No more piece to put.
+            
+        pqOfPiece = getLeastConstrainValueVar(curPos, dictOfCurBoard, dictOfNumberOfPiece)
+        trialBoard = copy.copy(dictOfCurBoard)
         trialDictOfPieces = copy.copy(dictOfPieces)
         trialDictOfNumberOfPieces = copy.copy(dictOfNumberOfPiece)
-        
-    return False
-
-# Changed to piece. For each piece, calc how many spots on the board is valid for it. Get piece with the min.
-# Return (numOfPositionsValid, Board.dictOfPriority.get(uniquePiece), (uniquePiece, listOfSpots))
-# lsOfSpots is =  node = (numOfPosBlocked,data), data = (pos,trialBoard)
-def getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPieces, dictOfPieces):
-    numOfPositionsValid = 0
-    listOfPcs = []
-    heapq.heapify(listOfPcs)
+        while (len(pqOfPiece) > 0):
+            (val,curPc) = heapq.heappop(pqOfPiece)
+            hasFailed = checkAndPlacePiece(curPc, curPos, trialBoard)
+            if (not hasFailed):
+                # Successful place
+                curTuple = (curPos[0], int(curPos[1:]))
+                trialDictOfPieces[curTuple] = curPc
+                trialDictOfNumberOfPieces[curPos] = curPc
+                result = newSearch(trialBoard, trialDictOfPieces, trialDictOfNumberOfPieces)
+                if (result):
+                    return True
+                else:
+                    trialBoard = copy.copy(dictOfCurBoard)
+                    trialDictOfPieces = copy.copy(dictOfPieces)
+                    trialDictOfNumberOfPieces = copy.copy(dictOfNumberOfPiece)
+        # All options failed
+        trialBoard[curPos] = 5 # 5 to means must be empty
+        return newSearch(trialBoard, dictOfPieces, dictOfNumberOfPiece)
+ 
+def getLeastConstrainValueVar(pos, dictOfCurBoard, dictOfNumberOfPieces):
+    curSpotLeft = 0
+    listOfPc = []
+    heapq.heapify(listOfPc)
+    trialBoard = copy.copy(dictOfCurBoard)
     dictOfSumOfPiece = {}
-    dictOfDistinctPiece = {}
-    
-    minNumOfPos = (InitParams.cols * InitParams.rows) + 1
-    bestPiece = -1
-    bestPiecePosLs = -1
     
     for nameOfPiece in Board.listOfRemainingPieces: #Calc the current number of pieces on board
         val = getNumOfPiece(nameOfPiece,dictOfNumberOfPieces)
-        if (dictOfDistinctPiece.get(nameOfPiece,"0") == "0"): # Add each unique piece.
-            dictOfDistinctPiece[nameOfPiece] = -1
         dictOfSumOfPiece[nameOfPiece] = val
-        
-    ls = ["Queen", "Bishop", "Rook", "Knight", "King"]
-    for uniquePiece in dictOfSumOfPiece:
-        x = 0
-        y = 0
-        
-        if (dictOfSumOfPiece.get(uniquePiece,0) >= Board.dictOfMaxPiece.get(uniquePiece,0)): #Check if num of piece has reached the max count
+    
+    for nameOfPc in Board.listOfRemainingPieces:
+        if (dictOfSumOfPiece.get(nameOfPc) >= Board.dictOfMaxPiece.get(nameOfPc)): #Check if num of piece has reached the max count
             continue
+        if (not checkAndPlacePiece(nameOfPc, pos, trialBoard)):
+            curSpotLeft = len(trialBoard)
+            node = (curSpotLeft,nameOfPc)
+            heapq.heappush(listOfPc,node)
+    return listOfPc
         
-        listOfSpots = []
-        heapq.heapify(listOfSpots)
-        while (y <= Board.maxCols):
-            pos = arrToChessPos(x, y)                
-            if (pos in dictOfCurBoard): #if position is blocked/threat
-                x+=1
-                if (x > Board.maxCols):
-                    x = 0
-                    y+=1
+def getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPieces):
+    count = 0
+    minCount = 99999
+    x = 0
+    y = 0
+    listOfPos = []
+    dictOfSumOfPiece = {}
+    
+    for nameOfPiece in Board.listOfRemainingPieces: #Calc the current number of pieces on board
+        val = getNumOfPiece(nameOfPiece,dictOfNumberOfPieces)
+        dictOfSumOfPiece[nameOfPiece] = val
+    
+    while(y <= Board.maxCols):
+        pos = arrToChessPos(x, y)
+        if (pos in dictOfCurBoard): #if position is blocked/threat (5 means allocated as empty)
                 continue
-            
-            if (Board.samePieceFlag):#(len(dictOfPieces) == InitParams.totalOwnPiece - 1):
-                flag = 0
-                curTuple = (pos[0], int(pos[1:]))
-                dictOfPieces[curTuple] = nameOfPiece #Dict to print
-                for i in range(len(Board.samePieceDict)):
-                    if (dictOfPieces == Board.samePieceDict[i]):
-                        flag = 1
-                        break
-                dictOfPieces.pop(curTuple)
-                if (flag == 1):
-                    x+=1
-                    if (x > Board.maxCols):
-                        x = 0
-                        y+=1
-                    continue
-            
-            #Portion for LCV
+        for nameOfPiece in Board.listOfRemainingPieces:
+            if (dictOfSumOfPiece.get(nameOfPiece) >= Board.dictOfMaxPiece.get(nameOfPiece)): #Check if num of piece has reached the max count
+                continue
             trialBoard = copy.copy(dictOfCurBoard)
-            isNotValidPlace = checkAndPlacePiece(uniquePiece, pos, trialBoard)
+            isNotValidPlace = checkAndPlacePiece(nameOfPiece, pos, trialBoard)
             if (not isNotValidPlace):
-                numOfPositionsValid+=1
-                #Portion for LCV
-                numOfPosBlocked = len(trialBoard)
-                data = (pos,trialBoard)
-                node = (numOfPosBlocked,data) # We want the least number of spots taken
-                if (Board.samePieceFlag): # Do not re-try the same spots.
-                    #Board.samePieceDict[pos] = -1
-                    pass
-                heapq.heappush(listOfSpots,node)
-            x+=1
-            if (x > Board.maxCols):
-                x = 0
-                y+=1
-        if (numOfPositionsValid == 0):
-            return -1        
-        if (numOfPositionsValid > 0 and numOfPositionsValid <= minNumOfPos):
-                # Priority is for max degree Heuristic.
-                if (numOfPositionsValid < minNumOfPos):
-                    (bestPiece, bestPiecePosLs) = uniquePiece, listOfSpots
-                elif (Board.dictOfPriority.get(bestPiece) > Board.dictOfPriority.get(uniquePiece)):
-                    (bestPiece, bestPiecePosLs) = uniquePiece, listOfSpots
-                #heapq.heappush(listOfPcs,(numOfPositionsValid,Board.dictOfPriority.get(uniquePiece),(uniquePiece,listOfSpots))) #count must be min        
-        numOfPositionsValid = 0
-    if (bestPiece == -1):
+                count+=1
+        if (count == minCount):
+            listOfPos.append(pos)
+        elif (count < minCount and count > 0):
+            listOfPos = []
+            minCount = count
+            listOfPos.append(pos)
+        x+=1
+        if (x > Board.maxCols):
+            x = 0
+            y+=1
+        count = 0
+ 
+    degree = 0
+    maxDegree = 0
+    finPos = []
+    # Max Degree Heuristic
+    for curPos in listOfPos:
+        (x,y) = chessPosToArr(curPos)
+        if (x + 1 <= Board.maxCols):
+            incPos = arrToChessPos(x+1, y)
+            val = dictOfCurBoard.get(incPos,0)
+            if (not val == -3):
+                degree+=1
+        if (x + 1 <= Board.maxCols and y + 1 <= Board.maxRows):
+            incPos = arrToChessPos(x+1, y+1)
+            val = dictOfCurBoard.get(incPos,0)
+            if (not val == -3):
+                degree+=1
+        if (y + 1 <= Board.maxRows):
+            incPos = arrToChessPos(x, y+1)
+            val = dictOfCurBoard.get(incPos,0)
+            if (not val == -3):
+                degree+=1
+        if (x - 1 >= 0 and y + 1 <= Board.maxRows):
+            incPos = arrToChessPos(x-1, y+1)
+            val = dictOfCurBoard.get(incPos,0)
+            if (not val == -3):
+                degree+=1
+        if (x - 1 >= 0):
+            incPos = arrToChessPos(x-1, y)
+            val = dictOfCurBoard.get(incPos,0)
+            if (not val == -3):
+                degree+=1
+        if (x - 1 >= 0 and y - 1 >= 0):
+            incPos = arrToChessPos(x-1, y-1)
+            val = dictOfCurBoard.get(incPos,0)
+            if (not val == -3):
+                degree+=1
+        if (y - 1 >= 0):
+            incPos = arrToChessPos(x, y-1)
+            val = dictOfCurBoard.get(incPos,0)
+            if (not val == -3):
+                degree+=1
+        if (x + 1 <= Board.maxCols and y - 1 >= 0):
+            incPos = arrToChessPos(x+1, y-1)
+            val = dictOfCurBoard.get(incPos,0)
+            if (not val == -3):
+                degree+=1
+        if (degree > maxDegree):
+            maxDegree = degree
+            finPos = []
+            finPos.append(curPos)
+        elif (degree == maxDegree and degree != 0):
+            finPos.append(curPos)
+        degree = 0
+    
+    if (len(finPos) == 0):
         return -1
-    # if (len(listOfPcs) == 0):
-    #      return -1
-    return (0,0,(bestPiece, bestPiecePosLs))
-    return heapq.heappop(listOfPcs)
-
+ 
+    return finPos.pop()
+ 
 def checkAndPlacePiece(piece, pos, dictOfCurBoard):
     status = False #True means is not valid place.
     if (piece == "King"):
@@ -413,7 +348,7 @@ def checkAndPlacePiece(piece, pos, dictOfCurBoard):
     elif (piece == "Queen"):
         status = Moves.markQueenMove(pos, dictOfCurBoard)
     return status
-
+ 
 def read_input(f):
     lineState = 0
     for curLine in f:
@@ -435,11 +370,11 @@ def read_input(f):
             InitParams.totalOwnPiece = getNumerOfEnemyOrOwn(curLine)
         else:
             pass
-
+ 
 def addObjToBoard():
     for obs in InitParams.dictOfObsOnBoard:
         Board.dictOfObs[obs] = -3
-
+ 
 #Returns row/col/# of obs
 def getRowOrColOrObs(string) -> int:
     try:
@@ -447,9 +382,9 @@ def getRowOrColOrObs(string) -> int:
         val = int(string[idx:])
     except Exception:
         #print("Error in geting Row/Col/# of obs")
-        sys.exit()
+        sys.exit()    
     return val
-
+ 
 #Returns list of Obj Pos in a list
 def getObjPos(string) -> list:
     if (InitParams.noOfObj == 0):
@@ -459,7 +394,7 @@ def getObjPos(string) -> list:
     valOnlyStr = valOnlyStr.strip()
     listOfVal = list(valOnlyStr.split(" "))
     return listOfVal
-
+ 
 #Get total number of Enemy pieces
 def getNumerOfEnemyOrOwn(string) -> int:
     idx = string.index(':') + 1
@@ -475,39 +410,31 @@ def getNumerOfEnemyOrOwn(string) -> int:
     for i in listOfvals:            
         count += int(i)
     return count
-
+ 
 def fillListOfPieces():
-    noOfDistinctPc = 0
     if (Board.dictOfMaxPiece.get("King") > 0):
-        noOfDistinctPc+=1
         Board.listOfRemainingPieces.append("King")
     if (Board.dictOfMaxPiece.get("Knight") > 0):
-        noOfDistinctPc+=1
         Board.listOfRemainingPieces.append("Knight")
     if (Board.dictOfMaxPiece.get("Rook") > 0):
-        noOfDistinctPc+=1
         Board.listOfRemainingPieces.append("Rook")
     if (Board.dictOfMaxPiece.get("Bishop") > 0):
-        noOfDistinctPc+=1
         Board.listOfRemainingPieces.append("Bishop")
     if (Board.dictOfMaxPiece.get("Queen") > 0):
-        noOfDistinctPc+=1
         Board.listOfRemainingPieces.append("Queen")
-    if (noOfDistinctPc == 1): # Indicate that there is onyl 1 type of piece in the board.
-        Board.samePieceFlag = 1
-
+ 
 # Converts chess coordinate to X,Y
 def chessPosToArr(pos) -> tuple:
     x = ord(pos[0]) - ord('a')
     y = int(pos[1:])
     return (x,y)
-
+ 
 # Converts X,Y to chess coords
 def arrToChessPos(x, y):
     ch = chr(x + ord('a'))
     return ch + str(y)
-
+ 
 def intToChar(curInt):
     return chr(curInt + ord('a'))
-
+ 
 #print(run_CSP())

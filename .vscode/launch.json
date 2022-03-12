@@ -12,7 +12,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "${workspaceFolder}\\Project 2\\CSP2.txt"//Change txt file name to match test case
+                "${workspaceFolder}\\Project 2\\CSP1.txt"//Change txt file name to match test case
             ]
         }
     ]

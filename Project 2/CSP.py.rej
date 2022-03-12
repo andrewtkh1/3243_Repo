@@ -1,0 +1,14 @@
+diff a/Project 2/CSP.py b/Project 2/CSP.py	(rejected hunks)
+@@ -97,10 +97,10 @@
+     def markLeft(x, y, numOfMoves, dictOfCurBoard):
+         maxCol = InitParams.cols - 1
+         pos = arrToChessPos(x,y)
+-        if (dictOfCurBoard.get(pos,0) == -1):
+-            return True
+         if (x > maxCol or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
+             return False
++        if (dictOfCurBoard.get(pos,0) == -1):
++            return True
+         dictOfCurBoard[pos] = -2
+         numOfMoves-=1
+         return Moves.markLeft(x-1, y, numOfMoves, dictOfCurBoard)
