@@ -19,7 +19,7 @@ class InitParams:
 
 class Board:
     samePieceFlag = 0
-    samePieceDict = {}
+    samePieceDict = []
     dictOfPriority = {'King': 4, 'Queen':0, 'Bishop': 2, 'Rook': 1, 'Knight': 3}
     maxRows = 0
     maxCols = 0
@@ -282,12 +282,8 @@ def search(dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece):
     
     lsOfSpots = []
     heapq.heapify(lsOfSpots)
-    
-    if (len(dictOfPieces) == InitParams.totalOwnPiece - 1):
-        cp = 2
-        pass
-    
-    pieceList = getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPiece)
+        
+    pieceList = getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPiece, dictOfPieces)
     if (pieceList == -1): #No valid assignment of piece
         return False
     (noOfPosValid, priority, data) = pieceList
@@ -304,11 +300,12 @@ def search(dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece):
         (pos, preDoneBoard) = node
         curTuple = (pos[0], int(pos[1:]))
         trialDictOfPieces[curTuple] = nameOfPiece #Dict to print
-        trialDictOfNumberOfPieces[pos] = nameOfPiece #Dict to keep track of what pieces are on the board.
+        trialDictOfNumberOfPieces[pos] = nameOfPiece #Dict to keep track of what pieces are on the board.        
         #print(trialDictOfPieces)
         result = search(preDoneBoard, trialDictOfPieces, trialDictOfNumberOfPieces) #change trialB to trial board
         if (result):
             return True
+        Board.samePieceDict.append(trialDictOfPieces)
         trialDictOfPieces = copy.copy(dictOfPieces)
         trialDictOfNumberOfPieces = copy.copy(dictOfNumberOfPiece)
         
@@ -317,7 +314,7 @@ def search(dictOfCurBoard, dictOfPieces, dictOfNumberOfPiece):
 # Changed to piece. For each piece, calc how many spots on the board is valid for it. Get piece with the min.
 # Return (numOfPositionsValid, Board.dictOfPriority.get(uniquePiece), (uniquePiece, listOfSpots))
 # lsOfSpots is =  node = (numOfPosBlocked,data), data = (pos,trialBoard)
-def getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPieces):
+def getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPieces, dictOfPieces):
     numOfPositionsValid = 0
     listOfPcs = []
     heapq.heapify(listOfPcs)
@@ -345,13 +342,30 @@ def getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPieces):
         listOfSpots = []
         heapq.heapify(listOfSpots)
         while (y <= Board.maxCols):
-            pos = arrToChessPos(x, y)
-            if (pos in dictOfCurBoard or pos in Board.samePieceDict): #if position is blocked/threat
+            pos = arrToChessPos(x, y)                
+            if (pos in dictOfCurBoard): #if position is blocked/threat
                 x+=1
                 if (x > Board.maxCols):
                     x = 0
                     y+=1
                 continue
+            
+            if (Board.samePieceFlag):#(len(dictOfPieces) == InitParams.totalOwnPiece - 1):
+                flag = 0
+                curTuple = (pos[0], int(pos[1:]))
+                dictOfPieces[curTuple] = nameOfPiece #Dict to print
+                for i in range(len(Board.samePieceDict)):
+                    if (dictOfPieces == Board.samePieceDict[i]):
+                        flag = 1
+                        break
+                dictOfPieces.pop(curTuple)
+                if (flag == 1):
+                    x+=1
+                    if (x > Board.maxCols):
+                        x = 0
+                        y+=1
+                    continue
+            
             #Portion for LCV
             trialBoard = copy.copy(dictOfCurBoard)
             isNotValidPlace = checkAndPlacePiece(uniquePiece, pos, trialBoard)
@@ -496,4 +510,4 @@ def arrToChessPos(x, y):
 def intToChar(curInt):
     return chr(curInt + ord('a'))
 
-print(run_CSP())
+#print(run_CSP())
