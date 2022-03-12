@@ -257,7 +257,7 @@ def getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPieces):
             dictOfDistinctPiece[nameOfPiece] = -1
         dictOfSumOfPiece[nameOfPiece] = val
         
-    ls = ["King", "Knight", "Bishop", "Rook", "Queen"]
+    ls = ["Queen", "Bishop", "Rook", "Knight", "King"]
     for uniquePiece in dictOfSumOfPiece:
         x = 0
         y = 0
@@ -408,4 +408,4 @@ def arrToChessPos(x, y):
 def intToChar(curInt):
     return chr(curInt + ord('a'))
 
-#print(run_CSP())
+print(run_CSP())
