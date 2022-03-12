@@ -18,6 +18,8 @@ class InitParams:
     dictOfObsOnBoard = {}
 
 class Board:
+    samePieceFlag = 0
+    samePieceDict = {}
     dictOfPriority = {'King': 4, 'Queen':0, 'Bishop': 2, 'Rook': 1, 'Knight': 3}
     maxRows = 0
     maxCols = 0
@@ -75,10 +77,19 @@ class Moves:
     def markUp(x, y, numOfMoves, dictOfCurBoard):
         maxRow = InitParams.rows - 1
         pos = arrToChessPos(x,y)
-        if (dictOfCurBoard.get(pos,0) == -1):
-            return True
+        while not (y > maxRow or y < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
+            pos = arrToChessPos(x,y)
+            if (dictOfCurBoard.get(pos,0) == -1):
+                return True
+            dictOfCurBoard[pos] = -2
+            numOfMoves-=1
+            y+=1
+        return False
+        pos = arrToChessPos(x,y)
         if (y > maxRow or y < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3): #-3 is obstacles
             return False
+        if (dictOfCurBoard.get(pos,0) == -1):
+            return True
         dictOfCurBoard[pos] = -2
         numOfMoves-=1
         return Moves.markUp(x, y+1, numOfMoves, dictOfCurBoard)
@@ -86,16 +97,34 @@ class Moves:
     def markDown(x, y, numOfMoves, dictOfCurBoard):
         maxRow = InitParams.rows - 1
         pos = arrToChessPos(x,y)
-        if (dictOfCurBoard.get(pos,0) == -1):
-            return True
+        while(not(y > maxRow or y < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3)):
+            pos = arrToChessPos(x,y)
+            if (dictOfCurBoard.get(pos,0) == -1):
+                return True
+            dictOfCurBoard[pos] = -2
+            numOfMoves-=1
+            y-=1
+        return False
+        pos = arrToChessPos(x,y)
         if (y > maxRow or y < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3) :
             return False
+        if (dictOfCurBoard.get(pos,0) == -1):
+            return True
         dictOfCurBoard[pos] = -2
         numOfMoves-=1
         return Moves.markDown(x, y-1, numOfMoves, dictOfCurBoard)
 
     def markLeft(x, y, numOfMoves, dictOfCurBoard):
         maxCol = InitParams.cols - 1
+        pos = arrToChessPos(x,y)
+        while not (x > maxCol or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
+            pos = arrToChessPos(x,y)
+            if (dictOfCurBoard.get(pos,0) == -1):
+                return True
+            dictOfCurBoard[pos] = -2
+            numOfMoves-=1
+            x-=1
+        return False
         pos = arrToChessPos(x,y)
         if (x > maxCol or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
             return False
@@ -107,6 +136,15 @@ class Moves:
 
     def markRight(x, y, numOfMoves, dictOfCurBoard):
         maxCol = InitParams.cols - 1
+        pos = arrToChessPos(x,y)
+        while not (x > maxCol or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
+            pos = arrToChessPos(x,y)
+            if (dictOfCurBoard.get(pos,0) == -1):
+                return True
+            dictOfCurBoard[pos] = -2
+            numOfMoves-=1
+            x+=1
+        return False
         pos = arrToChessPos(x,y)
         if (x > maxCol or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
             return False
@@ -120,6 +158,16 @@ class Moves:
         maxCol = InitParams.cols - 1
         maxRow = InitParams.rows - 1
         pos = arrToChessPos(x,y)
+        while not (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
+            pos = arrToChessPos(x,y)
+            if (dictOfCurBoard.get(pos,0) == -1):
+                return True
+            dictOfCurBoard[pos] = -2
+            numOfMoves-=1
+            x+=1
+            y+=1
+        return False
+        pos = arrToChessPos(x,y)
         if (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
             return False
         if (dictOfCurBoard.get(pos,0) == -1):
@@ -131,6 +179,16 @@ class Moves:
     def markTopLeft(x, y, numOfMoves, dictOfCurBoard):
         maxCol = InitParams.cols - 1
         maxRow = InitParams.rows - 1
+        pos = arrToChessPos(x,y)
+        while not  (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
+            pos = arrToChessPos(x,y)
+            if (dictOfCurBoard.get(pos,0) == -1):
+                return True
+            dictOfCurBoard[pos] = -2
+            numOfMoves-=1
+            x-=1
+            y+=1
+        return False
         pos = arrToChessPos(x,y)
         if (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
             return False
@@ -144,6 +202,16 @@ class Moves:
         maxCol = InitParams.cols - 1
         maxRow = InitParams.rows - 1
         pos = arrToChessPos(x,y)
+        while not (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
+            pos = arrToChessPos(x,y)
+            if (dictOfCurBoard.get(pos,0) == -1):
+                return True
+            dictOfCurBoard[pos] = -2
+            numOfMoves-=1
+            x+=1
+            y-=1
+        return False
+        pos = arrToChessPos(x,y)
         if (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
             return False
         if (dictOfCurBoard.get(pos,0) == -1):
@@ -155,6 +223,16 @@ class Moves:
     def markBotLeft(x, y, numOfMoves, dictOfCurBoard):
         maxCol = InitParams.cols - 1
         maxRow = InitParams.rows - 1
+        pos = arrToChessPos(x,y)
+        while not (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
+            pos = arrToChessPos(x,y)
+            if (dictOfCurBoard.get(pos,0) == -1):
+                return True
+            dictOfCurBoard[pos] = -2
+            numOfMoves-=1
+            x-=1
+            y-=1
+        return False
         pos = arrToChessPos(x,y)
         if (x > maxCol or y > maxRow or y < 0 or x < 0 or numOfMoves == 0 or dictOfCurBoard.get(pos,0) == -3):
             return False
@@ -250,7 +328,6 @@ def getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPieces):
     bestPiece = -1
     bestPiecePosLs = -1
     
-    
     for nameOfPiece in Board.listOfRemainingPieces: #Calc the current number of pieces on board
         val = getNumOfPiece(nameOfPiece,dictOfNumberOfPieces)
         if (dictOfDistinctPiece.get(nameOfPiece,"0") == "0"): # Add each unique piece.
@@ -269,7 +346,7 @@ def getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPieces):
         heapq.heapify(listOfSpots)
         while (y <= Board.maxCols):
             pos = arrToChessPos(x, y)
-            if (pos in dictOfCurBoard): #if position is blocked/threat
+            if (pos in dictOfCurBoard or pos in Board.samePieceDict): #if position is blocked/threat
                 x+=1
                 if (x > Board.maxCols):
                     x = 0
@@ -284,6 +361,9 @@ def getLeastRemainingValuePos(dictOfCurBoard, dictOfNumberOfPieces):
                 numOfPosBlocked = len(trialBoard)
                 data = (pos,trialBoard)
                 node = (numOfPosBlocked,data) # We want the least number of spots taken
+                if (Board.samePieceFlag): # Do not re-try the same spots.
+                    #Board.samePieceDict[pos] = -1
+                    pass
                 heapq.heappush(listOfSpots,node)
             x+=1
             if (x > Board.maxCols):
@@ -383,16 +463,24 @@ def getNumerOfEnemyOrOwn(string) -> int:
     return count
 
 def fillListOfPieces():
+    noOfDistinctPc = 0
     if (Board.dictOfMaxPiece.get("King") > 0):
+        noOfDistinctPc+=1
         Board.listOfRemainingPieces.append("King")
     if (Board.dictOfMaxPiece.get("Knight") > 0):
+        noOfDistinctPc+=1
         Board.listOfRemainingPieces.append("Knight")
     if (Board.dictOfMaxPiece.get("Rook") > 0):
+        noOfDistinctPc+=1
         Board.listOfRemainingPieces.append("Rook")
     if (Board.dictOfMaxPiece.get("Bishop") > 0):
+        noOfDistinctPc+=1
         Board.listOfRemainingPieces.append("Bishop")
     if (Board.dictOfMaxPiece.get("Queen") > 0):
+        noOfDistinctPc+=1
         Board.listOfRemainingPieces.append("Queen")
+    if (noOfDistinctPc == 1): # Indicate that there is onyl 1 type of piece in the board.
+        Board.samePieceFlag = 1
 
 # Converts chess coordinate to X,Y
 def chessPosToArr(pos) -> tuple:
