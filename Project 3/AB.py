@@ -1,4 +1,4 @@
-from heapq import merge
+import heapq
 import sys
 
 ### IMPORTANT: Remove any print() functions or rename any print functions/variables/string when submitting on CodePost
@@ -13,7 +13,7 @@ class InitParams:
 class Board:
     dictOfRemovedPieces = {} #Pieces that have been removed from board.
     dictOfCurBoard = {} #example: {'a0' : ('Queen', 'White'), 'd0' : ('Knight', 'Black'), 'g25' : ('Rook', 'White')}
-    dictOfWhitePieces = {}
+    dictOfWhitePieces = {} #example: {'a0' : ('Queen', 'White'), 'd0' : ('Knight', 'Black'), 'g25' : ('Rook', 'White')}
     dictOfBlackPieces = {}
     pass
 
@@ -251,22 +251,38 @@ def oppMin(minAlphaVal):
     pass
 
 #Prune if cur iter val >= maxBetaVal
+# white Piece
 def playerMax(maxBetaVal, board, totalMoves):
     maxVal = -1 #set to -inf
     dictOfBlackThreats = {}
+    hasNoMoreMoves = True
+    dictOfMoves = {} #{'a0' : ('Queen', listOfPossibleMoves)}
+    for whitePos in Board.dictOfWhitePieces:
+        (whitePiece, color) = Board.dictOfWhitePieces.get(whitePos) #example: {'a0' : ('Queen', 'White'), 'd0' : ('Knight', 'Black'), 'g25' : ('Rook', 'White')}
+        moves = getListOfMoves(pos, whitePiece, "White", False)
+        if (len(moves) > 0):
+            hasNoMoreMoves = False
+        dictOfMoves[pos] = (whitePiece, moves)
+    if (hasNoMoreMoves):
+        #Out of moves hence tie
+        return 0
+    
     for pos in Board.dictOfBlackPieces: # Get the current threats for Opponent.
         (piece, color) = Board.dictOfBlackPieces.get(pos)
         threats = getListOfMoves(pos, piece, "Black", True)
-        dictOfBlackThreats[pos] = threats
-    if (isTerminal(board, "White")):
+        dictOfBlackThreats[pos] = threats # {'a0': list Of position he threatens}
+    if (isTerminal(board, "White", dictOfBlackThreats)):
         
         pass
     pass
 
-# Terminal cases: No more moves, checkmate. 
-def isTerminal(board, color):
-    whiteHasMoves = 0
-    blackHasMoves = 0
+# Terminal cases: No more moves, checkmate.
+# Ways to checkmate: Check if king can move out of the way OR get list of people threatens king & see if can eat any. OR see any local piece can block(Get from list of moves)
+# dictOfThreats = {'a0': list Of position he threatens, 'b0' : ....}
+def isTerminal(board, color, dictOfThreats):
+    #Gets current position of my own King.
+    dictOfPosAgainstKing = {}
+    dictOfPossibleKingMoves = {}
     if (color == "White"):
         for pos in Board.dictOfWhitePieces:
             (piece, color) = Board.dictOfWhitePieces.get(pos)
@@ -278,8 +294,22 @@ def isTerminal(board, color):
             if (piece == "King"):
                 kingPos = pos
     
-    for key in board:
-        piece, color = board.get(key)
+    for originThreatPos in dictOfThreats: #Find who threatens king
+        if (kingPos in dictOfThreats.get(originThreatPos)):
+            dictOfPosAgainstKing[originThreatPos] = 1
+    
+    numOfThreats = len(dictOfPosAgainstKing)
+    
+    if (numOfThreats <= 0): # If true -> no ones threatens king
+        return False
+    
+    if (numOfThreats == 1): #if it's 1 piece, try to eat it. If more than 2, can't eat
+        
+        pass
+        
+        
+    Moves.markKingMove(kingPos, dictOfPossibleKingMoves, color) #Get possible escapes
+    
 
     pass
 
@@ -326,7 +356,3 @@ def initializBoard():
         else:
             Board.dictOfBlackPieces[charPos] = data
         
-        
-def driverFunction():
-    
-    studentAgent(Game.startGameBoard)
