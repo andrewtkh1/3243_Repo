@@ -265,7 +265,7 @@ class Moves:
         heapq.heappush(pqOfmoves, node)
         numOfMoves-=1
         Moves.markBotRight(x+1, y-1, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces)
-
+        
     def markBotLeft(x, y, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces):
         maxCol = InitParams.cols - 1
         maxRow = InitParams.rows - 1
@@ -368,7 +368,6 @@ def playerMax(maxBetaVal, board, totalMoves, dictOfWhitePieces, dictOfBlackPiece
 
 # Ways to checkmate: Check if king can move out of the way OR get list of people threatens king & see if can eat any. OR see any local piece can block(Get from list of moves)
 # Possible current util vaues: Checkmate -> capture and check -> Capture -> Check
-
 # dictOfThreats = {'a0': list Of position he threatens, 'b0' : ....}
 # Check = 6, Checkmate = -100
 # dictOfPiece: {'a0' : ('Queen', 'White'), 'd0' : ('Knight', 'Black'), 'g25' : ('Rook', 'White')}
@@ -398,27 +397,26 @@ def getUtil(board, color, dictOfEnemyThreats, dictOfMyAttacks, dictOfMyPiece, di
     
     numOfThreats = len(dictOfPosAgainstKing)
     
-    if (numOfThreats <= 0): # If true -> no checks against king
+    if (numOfThreats > 0): # If true -> no checks against king
         isCheck = True
 
     # Get total value of people that was ate.
     if (color == "White"):
         numOfPiecesAte = len(Board.initialDictOfBlackPieces) - len(dictOfEnemyPiece)
         if (numOfPiecesAte > 0):
+            hasEatPiece = True
             valueOfEatenPiece = getValueOfPiecesEatened(Board.initialDictOfBlackPieces, dictOfEnemyPiece)
     else:
         numOfPiecesAte = len(Board.initialDictOfWhitePieces) - len(dictOfEnemyPiece)
         if (numOfPiecesAte > 0):
+            hasEatPiece = True
             valueOfEatenPiece = getValueOfPiecesEatened(Board.initialDictOfWhitePieces, dictOfEnemyPiece)
-
-    if (numOfPiecesAte > 0):
-        hasEatPiece = True
 
     # Checkmate -> capture and check -> Capture -> Check
     if (not hasEatPiece and not isCheck): # No eats or no checks
         return 0
     elif (not isCheck and hasEatPiece): # Only Ate
-        return valueOfEatenPiece
+        return -(valueOfEatenPiece)
 
     canEatOppKing = False
     if (numOfThreats == 1): # IF only 1 threat against King, can consider eating it to escape.
@@ -428,20 +426,20 @@ def getUtil(board, color, dictOfEnemyThreats, dictOfMyAttacks, dictOfMyPiece, di
             if (enemyKingPos in moves):
                 isCheckmate = False
                 break
-            isCheckmate = True
         
-        if (isCheckmate):
-            return -100
-        if (isCheck and hasEatPiece):
+        if (not isCheckmate and hasEatPiece and isCheck): #Possible error: Eat opponent piece and that is threat by another piece
             return -(valueOfEatenPiece + 6)
-        if (isCheck):
-            return 6
+        if (not isCheckmate and isCheck and not hasEatPiece):
+            return -6
         
     # Has more than 2 pieces against my king
     nullList = [] #Just to fill up the parameter
     dictOfPossibleKingMoves = {} #Possible moves for my own king
-    Moves.markKingMove(kingPos, dictOfPossibleKingMoves, color, dictOfMyPiece, dictOfEnemyPiece) #Get possible escapes
-    canEscape = False
+    if (color == "White"):
+        Moves.markKingMove(kingPos, dictOfPossibleKingMoves, color, nullList, dictOfMyPiece, dictOfEnemyPiece) #Get possible escapes
+    else:
+        Moves.markKingMove(kingPos, dictOfPossibleKingMoves, color, nullList, dictOfEnemyPiece, dictOfMyPiece) #Get possible escapes
+    canEscape = False 
     
     for possibeEscape in list(dictOfPossibleKingMoves):
         isThreat = False
