@@ -1,5 +1,6 @@
 import copy
 import heapq
+from os import terminal_size
 import sys
 import weakref
 
@@ -43,8 +44,8 @@ class Moves:
             
     def markRookMove(pos, dictOfMoves, color, pqOfmoves, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover):
         (x,y) = chessPosToArr(pos)
-        Moves.markUp(x,y+1,-1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
-        Moves.markDown(x, y-1, -1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
+        Moves.markUp(x,y+1,-1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover, False)
+        Moves.markDown(x, y-1, -1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover, False)
         Moves.markLeft(x-1, y, -1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
         Moves.markRight(x+1, y, -1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
     
@@ -57,8 +58,8 @@ class Moves:
             
     def markQueenMove(pos, dictOfMoves, color, pqOfmoves, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover):
         (x,y) = chessPosToArr(pos)
-        Moves.markUp(x, y+1, -1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
-        Moves.markDown(x, y-1, -1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
+        Moves.markUp(x, y+1, -1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover, False)
+        Moves.markDown(x, y-1, -1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover, False)
         Moves.markLeft(x-1, y, -1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
         Moves.markRight(x+1, y, -1, dictOfMoves, color,pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
         Moves.markTopRight(x+1, y+1, -1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
@@ -68,8 +69,8 @@ class Moves:
     
     def markKingMove(pos, dictOfMoves, color, pqOfmoves, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover):
         (x,y) = chessPosToArr(pos)
-        Moves.markUp(x, y+1, 1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
-        Moves.markDown(x, y-1, 1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
+        Moves.markUp(x, y+1, 1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover, False)
+        Moves.markDown(x, y-1, 1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover, False)
         Moves.markLeft(x-1, y, 1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
         Moves.markRight(x+1, y, 1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
         Moves.markTopRight(x+1, y+1, 1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
@@ -81,7 +82,7 @@ class Moves:
         (x,y) = chessPosToArr(pos)
         if (color == "White"): #Moves from top down increasing y val.
             if (not onlyThreatPos):
-                Moves.markUp(x, y+1, 1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
+                Moves.markUp(x, y+1, 1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover, True)
             diagMove = arrToChessPos(x+1, y+1)
             diagMove2 = arrToChessPos(x-1, y+1)
             if (diagMove in dictOfWhitePieces):
@@ -102,7 +103,7 @@ class Moves:
                 heapq.heappush(pqOfmoves, node)
         else: #If black piece
             if (not onlyThreatPos):
-                Moves.markDown(x, y-1, 1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
+                Moves.markDown(x, y-1, 1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover, True)
             diagMove = arrToChessPos(x+1, y-1)
             diagMove2 = arrToChessPos(x-1, y-1)
             if (diagMove in dictOfBlackPieces): # Check if I can cover myself.
@@ -123,13 +124,17 @@ class Moves:
                 heapq.heappush(pqOfmoves, node)
         return
     
-    def markUp(x, y, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover):
+    def markUp(x, y, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover, isPawn):
         maxRow = InitParams.rows - 1
         pos = arrToChessPos(x,y)
         if (y > maxRow or y < 0 or numOfMoves == 0):
             return
+        if(isPawn):
+            if ((pos in dictOfBlackPieces) or (pos in dictOfWhitePieces)): #if is pawn, infront is blocked 
+                return
         if ((color == "White" and pos in dictOfWhitePieces) or (color == "Black" and pos in dictOfBlackPieces)): #Check if can cover myself.
             dictOfMyCover[pos] = 1
+            return
         if ((color == "White" and pos in dictOfBlackPieces) or (color == "Black" and pos in dictOfWhitePieces)): #eat another person's peice
             dictOfMoves[pos] = 1
             if (color == "White"):
@@ -145,15 +150,19 @@ class Moves:
         node = (-1, (originPos,pos)) # Add move without eating into PQ.
         heapq.heappush(pqOfmoves, node)
         numOfMoves-=1
-        Moves.markUp(x, y+1, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
+        Moves.markUp(x, y+1, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover, isPawn)
 
-    def markDown(x, y, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover):
+    def markDown(x, y, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover, isPawn):
         maxRow = InitParams.rows - 1
         pos = arrToChessPos(x,y)
         if (y > maxRow or y < 0 or numOfMoves == 0):
             return
+        if(isPawn):
+            if ((pos in dictOfBlackPieces) or (pos in dictOfWhitePieces)): #if is pawn, infront is blocked 
+                return
         if ((color == "White" and pos in dictOfWhitePieces) or (color == "Black" and pos in dictOfBlackPieces)): #Check if can cover myself.
             dictOfMyCover[pos] = 1
+            return
         if ((color == "White" and pos in dictOfBlackPieces) or (color == "Black" and pos in dictOfWhitePieces)): #Hit a piece
             if (color == "White"):
                 (pieceName, pieceColor) = dictOfBlackPieces.get(pos) #Adds piece to eat as higher priority for white's move
@@ -168,7 +177,7 @@ class Moves:
         node = (-1, (originPos,pos)) # Add move without eating into PQ.
         heapq.heappush(pqOfmoves, node)
         numOfMoves-=1
-        Moves.markDown(x, y-1, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
+        Moves.markDown(x, y-1, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover, isPawn)
 
     def markLeft(x, y, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover):
         maxCol = InitParams.cols - 1
@@ -177,6 +186,7 @@ class Moves:
             return
         if ((color == "White" and pos in dictOfWhitePieces) or (color == "Black" and pos in dictOfBlackPieces)): #Check if can cover myself.
             dictOfMyCover[pos] = 1
+            return
         if ((color == "White" and pos in dictOfBlackPieces) or (color == "Black" and pos in dictOfWhitePieces)): #Hit a piece
             if (color == "White"):
                 (pieceName, pieceColor) = dictOfBlackPieces.get(pos) #Adds piece to eat as higher priority for white's move
@@ -200,6 +210,7 @@ class Moves:
             return
         if ((color == "White" and pos in dictOfWhitePieces) or (color == "Black" and pos in dictOfBlackPieces)): #Check if can cover myself.
             dictOfMyCover[pos] = 1
+            return
         if ((color == "White" and pos in dictOfBlackPieces) or (color == "Black" and pos in dictOfWhitePieces)): #Hit a piece
             if (color == "White"):
                 (pieceName, pieceColor) = dictOfBlackPieces.get(pos) #Adds piece to eat as higher priority for white's move
@@ -224,6 +235,7 @@ class Moves:
             return
         if ((color == "White" and pos in dictOfWhitePieces) or (color == "Black" and pos in dictOfBlackPieces)): #Check if can cover myself.
             dictOfMyCover[pos] = 1
+            return
         if ((color == "White" and pos in dictOfBlackPieces) or (color == "Black" and pos in dictOfWhitePieces)): #Hit a piece
             if (color == "White"):
                 (pieceName, pieceColor) = dictOfBlackPieces.get(pos) #Adds piece to eat as higher priority for white's move
@@ -248,6 +260,7 @@ class Moves:
             return
         if ((color == "White" and pos in dictOfWhitePieces) or (color == "Black" and pos in dictOfBlackPieces)): #Check if can cover myself.
             dictOfMyCover[pos] = 1
+            return
         if ((color == "White" and pos in dictOfBlackPieces) or (color == "Black" and pos in dictOfWhitePieces)): #Hit a piece
             if (color == "White"):
                 (pieceName, pieceColor) = dictOfBlackPieces.get(pos) #Adds piece to eat as higher priority for white's move
@@ -272,6 +285,7 @@ class Moves:
             return
         if ((color == "White" and pos in dictOfWhitePieces) or (color == "Black" and pos in dictOfBlackPieces)): #Check if can cover myself.
             dictOfMyCover[pos] = 1
+            return
         if ((color == "White" and pos in dictOfBlackPieces) or (color == "Black" and pos in dictOfWhitePieces)): #Hit a piece
             if (color == "White"):
                 (pieceName, pieceColor) = dictOfBlackPieces.get(pos) #Adds piece to eat as higher priority for white's move
@@ -296,6 +310,7 @@ class Moves:
             return
         if ((color == "White" and pos in dictOfWhitePieces) or (color == "Black" and pos in dictOfBlackPieces)): #Check if can cover myself.
             dictOfMyCover[pos] = 1
+            return
         if ((color == "White" and pos in dictOfBlackPieces) or (color == "Black" and pos in dictOfWhitePieces)): #Hit a piece
             if (color == "White"):
                 (pieceName, pieceColor) = dictOfBlackPieces.get(pos) #Adds piece to eat as higher priority for white's move
@@ -331,11 +346,12 @@ def playerMin(minAlphaVal, maxBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
     if (len(dictOfMoves) == 0):
         # Out of moves. Means draw
         return -1,nextMove
-
-    if (isTerminal(totalMoves, "Black", dictOfWhitePieces, dictOfBlackPieces)):
+    
+    terminalValue = isTerminal(totalMoves, "Black", dictOfWhitePieces, dictOfBlackPieces)
+    if (terminalValue > 0): # 1 = No more moves, 2 = No king, 0 = not terminal
         paddingList = [] #can ignore
         dictOfEnemyCover = {}
-        if (totalMoves < 5): # Terminated due to a king missing.
+        if (terminalValue == 2): # Terminated due to a king missing.
             return -1000,nextMove # I lost my king
 
         # Reached end of LDS. Need to get Current board value.
@@ -384,11 +400,12 @@ def playerMax(minAlphaVal, maxBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
     if (len(dictOfMoves) == 0):
         # Out of moves. Means draw
         return -1, nextMove
-
-    if (isTerminal(totalMoves, "White", dictOfWhitePieces, dictOfBlackPieces)):
+    
+    terminalValue = isTerminal(totalMoves, "White", dictOfWhitePieces, dictOfBlackPieces)
+    if (terminalValue > 0): # 1 = No more moves, 2 = No king, 0 = not terminal
         paddingList = [] #can ignore
         dictOfEnemyCover = {}
-        if (totalMoves < 5): # Terminated due to a king missing.
+        if (terminalValue == 2): # Terminated due to a king missing.
             return -1000, nextMove # I lost my king
 
         # Reached end of LDS. Need to get Current board value.
@@ -472,11 +489,12 @@ def getUtil(color, dictOfEnemyThreats, dictOfMyAttacks, dictOfMyPiece, dictOfEne
     
     # Try to escape first!
     nullList = [] #Just to fill up the parameter
+    nullDict = {}
     dictOfPossibleKingMoves = {} #Possible moves for my own king
     if (color == "White"):
-        Moves.markKingMove(kingPos, dictOfPossibleKingMoves, color, nullList, dictOfMyPiece, dictOfEnemyPiece) #Get possible escapes
+        Moves.markKingMove(kingPos, dictOfPossibleKingMoves, color, nullList, dictOfMyPiece, dictOfEnemyPiece, nullDict) #Get possible escapes
     else:
-        Moves.markKingMove(kingPos, dictOfPossibleKingMoves, color, nullList, dictOfEnemyPiece, dictOfMyPiece) #Get possible escapes
+        Moves.markKingMove(kingPos, dictOfPossibleKingMoves, color, nullList, dictOfEnemyPiece, dictOfMyPiece, nullDict) #Get possible escapes
     canEscape = False
     
     for possibeEscape in list(dictOfPossibleKingMoves):
@@ -604,22 +622,25 @@ def getPieceValue(pieceName):
     
 # Terminal cases. King is gone.
 def isTerminal(numOfmoves, color, dictOfWhitePieces, dictOfBlackPieces):
-    if (numOfmoves > 5):
-        return True
-    
     #Check for kings
     if (color == "Black"):
         for pos in dictOfBlackPieces:
             (pieceName, pieceColor) = dictOfBlackPieces.get(pos)
             if (pieceName == "King"):
-                return False
+                if (numOfmoves <= 0):
+                    return 1 # Has king but no moves left
+                else: # Has king and Has moves left.
+                    return 0
+        return 2 # No king left.
     else:
         for pos in dictOfWhitePieces:
             (pieceName, pieceColor) = dictOfWhitePieces.get(pos)
             if (pieceName == "King"):
-                return False
-    return True
-
+                if (numOfmoves <= 0):
+                    return 1 # Has king but no moves left
+                else: # Has king and Has moves left.
+                    return 0
+        return 2 # No king left.
 
 # list of moves returned. Moves can either eat or not eat. All are valid.
 def getListOfMoves(pos, piece, color, onlyThreatFlag, pqOfmoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover):   
@@ -689,8 +710,8 @@ def studentAgent(gameboard):
     move = (None,None)
 
     initializBoard(gameboard, dictOfWhitePieces, dictOfBlackPieces) #Populate dict of white/black and curboard.
-    (cost,move) = playerMax(1000000,-1000000,5,dictOfWhitePieces,dictOfBlackPieces)
+    (cost,move) = playerMax(1000000,-1000000,6 ,dictOfWhitePieces,dictOfBlackPieces)
 
     return move #Format to be returned (('a', 0), ('b', 3))
 
-print(studentAgent(Game.startGameBoard))
+#print(studentAgent(Game.startGameBoard))
