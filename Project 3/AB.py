@@ -60,7 +60,7 @@ class Moves:
         Moves.markUp(x, y+1, -1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
         Moves.markDown(x, y-1, -1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
         Moves.markLeft(x-1, y, -1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
-        Moves.markRight(x+1, y, -1, dictOfMoves, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
+        Moves.markRight(x+1, y, -1, dictOfMoves, color,pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
         Moves.markTopRight(x+1, y+1, -1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
         Moves.markTopLeft(x-1, y+1, -1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
         Moves.markBotRight(x+1, y-1, -1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
@@ -312,44 +312,57 @@ class Moves:
         numOfMoves-=1
         Moves.markBotLeft(x-1, y-1, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
 
-'''
-Overall algo
-Given current game board, Iterate thru till certain depth (LDS) to get Util function, recurse back and find next best move. Perform A-B Prune along the way.'''
-### DO NOT EDIT/REMOVE THE FUNCTION HEADER BELOW###
-# Chess Pieces: King, Queen, Knight, Bishop, Rook (First letter capitalized)
-# Colours: White, Black (First Letter capitalized)
-# Positions: Tuple. (column (String format), row (Int)). Example: ('a', 0)
-
-# Parameters:
-# gameboard: Dictionary of positions (Key) to the tuple of piece type and its colour (Value). This represents the current pieces left on the board.
-# Key: position is a tuple with the x-axis in String format and the y-axis in integer format.
-# Value: tuple of piece type and piece colour with both values being in String format. Note that the first letter for both type and colour are capitalized as well.
-# gameboard example: {('a', 0) : ('Queen', 'White'), ('d', 10) : ('Knight', 'Black'), ('g', 25) : ('Rook', 'White')}
-#
-# Return value:
-# move: A tuple containing the starting position of the piece being moved to the new position for the piece. x-axis in String format and y-axis in integer format.
-# move example: (('a', 0), ('b', 3))
-
-def studentAgent(gameboard):
-    # You can code in here but you cannot remove this function, change its parameter or change the return type
-    config = sys.argv[1] #Takes in config.txt Optional
-
-    dictOfWhitePieces = {} #example: {'a0' : ('Queen', 'White'), 'd0' : ('Knight', 'Black'), 'g25' : ('Rook', 'White')}
-    dictOfBlackPieces = {}
-
-    initializBoard(gameboard, dictOfWhitePieces, dictOfBlackPieces) #Populate dict of white/black and curboard.
-
-
-    move = (None, None)
-    return move #Format to be returned (('a', 0), ('b', 3))
-
-#Implement your minimax with alpha-beta pruning algorithm here.
-def ab():
-    pass
-
 #Prune if cur iter val <= minAlphaVal
 def playerMin(minAlphaVal, maxBetaVal, totalMoves, dictOfWhitePieces, dictOfBlackPieces):
-    pass
+    minVal = 999999 #set to inf
+    dictOfWhiteThreats = {}
+    dictOfMoves = {} #{'a0' : ('Queen', listOfPossibleMoves)}
+    pqOfMoves = [] #[(-10, ('a3', 'b3', "Queen")] (source, dest, Piece)
+    heapq.heapify(pqOfMoves)
+    dictOfMyCover = {}
+    nextMove = (0,0)
+    
+    #Get list of moves
+    for blackPos in dictOfBlackPieces:
+        (blackPiece, color) = dictOfBlackPieces.get(blackPos) #example: {'a0' : ('Queen', 'White'), 'd0' : ('Knight', 'Black'), 'g25' : ('Rook', 'White')}
+        moves = getListOfMoves(blackPos, blackPiece, "Black", False, pqOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
+        dictOfMoves[blackPos] = (blackPiece, moves)
+
+    if (len(dictOfMoves) == 0):
+        # Out of moves. Means draw
+        return -1,nextMove
+
+    if (isTerminal(totalMoves, "Black", dictOfWhitePieces, dictOfBlackPieces)):
+        paddingList = [] #can ignore
+        dictOfEnemyCover = {}
+        if (totalMoves < 5): # Terminated due to a king missing.
+            return -1000,nextMove # I lost my king
+
+        # Reached end of LDS. Need to get Current board value.
+        for pos in dictOfBlackPieces: # Get the current threats for Opponent.
+            (piece, color) = dictOfBlackPieces.get(pos)
+            threats = getListOfMoves(pos, piece, "Black", True, paddingList, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover)
+            dictOfWhiteThreats[pos] = threats # {'a0': list Of position he threatens}
+
+        return getUtil("White", dictOfWhiteThreats, dictOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover),nextMove
+    
+    #iterate thru list of possible moves from best to worst
+    while(len(pqOfMoves) > 0):
+        (cost, (sourcePos, destPos)) = heapq.heappop(pqOfMoves)
+        tmpDictOfWhitePiece = copy.copy(dictOfWhitePieces)
+        tmpDictOfBlackPiece = copy.copy(dictOfBlackPieces)
+        transitionModel(sourcePos, destPos, tmpDictOfBlackPiece, tmpDictOfWhitePiece)
+        curVal,hisMove = playerMax(minAlphaVal, maxBetaVal, totalMoves-1, tmpDictOfWhitePiece, tmpDictOfBlackPiece)
+        
+        if (curVal < minVal):
+            if (curVal > maxBetaVal): #updates maxBeta Val
+                maxBetaVal = curVal
+                nextMove = (sourcePos, destPos)
+            minVal = curVal
+            if (minVal <= minAlphaVal): #Prune
+                return (minVal,nextMove)
+            
+    return minVal,nextMove
 
 #Prune if cur iter val >= maxBetaVal
 # white Piece
@@ -360,22 +373,23 @@ def playerMax(minAlphaVal, maxBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
     pqOfMoves = [] #[(-10, ('a3', 'b3', "Queen")] (source, dest, Piece)
     heapq.heapify(pqOfMoves)
     dictOfMyCover = {}
+    nextMove = (0,0)
 
     #Get list of moves
     for whitePos in dictOfWhitePieces:
         (whitePiece, color) = dictOfWhitePieces.get(whitePos) #example: {'a0' : ('Queen', 'White'), 'd0' : ('Knight', 'Black'), 'g25' : ('Rook', 'White')}
-        moves = getListOfMoves(pos, whitePiece, "White", False, pqOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
-        dictOfMoves[pos] = (whitePiece, moves)
+        moves = getListOfMoves(whitePos, whitePiece, "White", False, pqOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
+        dictOfMoves[whitePos] = (whitePiece, moves)
 
     if (len(dictOfMoves) == 0):
         # Out of moves. Means draw
-        return -1
+        return -1, nextMove
 
     if (isTerminal(totalMoves, "White", dictOfWhitePieces, dictOfBlackPieces)):
         paddingList = [] #can ignore
         dictOfEnemyCover = {}
         if (totalMoves < 5): # Terminated due to a king missing.
-            return -1000 # I lost my king
+            return -1000, nextMove # I lost my king
 
         # Reached end of LDS. Need to get Current board value.
         for pos in dictOfBlackPieces: # Get the current threats for Opponent.
@@ -383,7 +397,7 @@ def playerMax(minAlphaVal, maxBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
             threats = getListOfMoves(pos, piece, "Black", True, paddingList, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover)
             dictOfBlackThreats[pos] = threats # {'a0': list Of position he threatens}
 
-        return getUtil("White", dictOfBlackThreats, dictOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover)
+        return getUtil("White", dictOfBlackThreats, dictOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover), nextMove
     
     #iterate thru list of possible moves from best to worst
     while(len(pqOfMoves) > 0):
@@ -391,15 +405,18 @@ def playerMax(minAlphaVal, maxBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
         tmpDictOfWhitePiece = copy.copy(dictOfWhitePieces)
         tmpDictOfBlackPiece = copy.copy(dictOfBlackPieces)
         transitionModel(sourcePos, destPos, tmpDictOfWhitePiece, tmpDictOfBlackPiece)
-        curVal = -(playerMin(minAlphaVal, maxBetaVal, totalMoves, tmpDictOfWhitePiece, tmpDictOfBlackPiece))
+        curVal, hisMove = playerMin(minAlphaVal, maxBetaVal, totalMoves-1, tmpDictOfWhitePiece, tmpDictOfBlackPiece)
+        curVal = -curVal
         
         if (curVal > maxVal):
             if (curVal < minAlphaVal): #updates minAlpha Val
                 minAlphaVal = curVal
+                nextMove = (sourcePos, destPos)
             maxVal = curVal
             if (maxVal >= maxBetaVal): #Prune
-                return maxVal
-    return maxVal
+                return maxVal, nextMove
+            
+    return maxVal, nextMove
 
 # Ways to checkmate: Check if king can move out of the way OR get list of people threatens king & see if can eat any. OR see any local piece can block(Get from list of moves)
 # Possible current util vaues: Checkmate -> capture and check -> Capture -> Check
@@ -640,10 +657,40 @@ def initializBoard(startGameBoard, dictOfWhitePieces, dictOfBlackPieces):
     for pos in startGameBoard:
         data = startGameBoard.get(pos)
         (piece, color) = data
-        charPos = chr(pos[1] + pos[2])
+        charPos = pos[0] + str(pos[1])
         if (color == "White"):
             dictOfWhitePieces[charPos] = data
             Board.initialDictOfWhitePieces[charPos] = data
         else:
             dictOfBlackPieces[charPos] = data
             Board.initialDictOfBlackPieces[charPos] = data
+            
+### DO NOT EDIT/REMOVE THE FUNCTION HEADER BELOW###
+# Chess Pieces: King, Queen, Knight, Bishop, Rook (First letter capitalized)
+# Colours: White, Black (First Letter capitalized)
+# Positions: Tuple. (column (String format), row (Int)). Example: ('a', 0)
+
+# Parameters:
+# gameboard: Dictionary of positions (Key) to the tuple of piece type and its colour (Value). This represents the current pieces left on the board.
+# Key: position is a tuple with the x-axis in String format and the y-axis in integer format.
+# Value: tuple of piece type and piece colour with both values being in String format. Note that the first letter for both type and colour are capitalized as well.
+# gameboard example: {('a', 0) : ('Queen', 'White'), ('d', 10) : ('Knight', 'Black'), ('g', 25) : ('Rook', 'White')}
+#
+# Return value:
+# move: A tuple containing the starting position of the piece being moved to the new position for the piece. x-axis in String format and y-axis in integer format.
+# move example: (('a', 0), ('b', 3))
+
+def studentAgent(gameboard):
+    # You can code in here but you cannot remove this function, change its parameter or change the return type
+    #config = sys.argv[1] #Takes in config.txt Optional
+
+    dictOfWhitePieces = {} #example: {'a0' : ('Queen', 'White'), 'd0' : ('Knight', 'Black'), 'g25' : ('Rook', 'White')}
+    dictOfBlackPieces = {}
+    move = (None,None)
+
+    initializBoard(gameboard, dictOfWhitePieces, dictOfBlackPieces) #Populate dict of white/black and curboard.
+    (cost,move) = playerMax(1000000,-1000000,5,dictOfWhitePieces,dictOfBlackPieces)
+
+    return move #Format to be returned (('a', 0), ('b', 3))
+
+print(studentAgent(Game.startGameBoard))
