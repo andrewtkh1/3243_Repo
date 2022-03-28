@@ -423,7 +423,7 @@ def playerMax(minAlphaVal, maxBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
         tmpDictOfBlackPiece = copy.copy(dictOfBlackPieces)
         transitionModel(sourcePos, destPos, tmpDictOfWhitePiece, tmpDictOfBlackPiece)
         curVal, hisMove = playerMin(minAlphaVal, maxBetaVal, totalMoves-1, tmpDictOfWhitePiece, tmpDictOfBlackPiece)
-        curVal = -curVal
+        #curVal = -curVal
         
         if (curVal > maxVal):
             if (curVal < minAlphaVal): #updates minAlpha Val
@@ -471,15 +471,15 @@ def getUtil(color, dictOfEnemyThreats, dictOfMyAttacks, dictOfMyPiece, dictOfEne
 
     # Get total value of people that was ate.
     if (color == "White"):
-        numOfPiecesAte = len(Board.initialDictOfBlackPieces) - len(dictOfEnemyPiece)
-        if (numOfPiecesAte > 0):
-            hasEatPiece = True
-            valueOfEatenPiece = getValueOfPiecesEatened(Board.initialDictOfBlackPieces, dictOfEnemyPiece)
-    else:
         numOfPiecesAte = len(Board.initialDictOfWhitePieces) - len(dictOfEnemyPiece)
         if (numOfPiecesAte > 0):
             hasEatPiece = True
-            valueOfEatenPiece = getValueOfPiecesEatened(Board.initialDictOfWhitePieces, dictOfEnemyPiece)
+            valueOfEatenPiece = getValueOfPiecesEatened(Board.initialDictOfWhitePieces, dictOfMyPiece)
+    else:
+        numOfPiecesAte = len(Board.initialDictOfBlackPieces) - len(dictOfEnemyPiece)
+        if (numOfPiecesAte > 0):
+            hasEatPiece = True
+            valueOfEatenPiece = getValueOfPiecesEatened(Board.initialDictOfBlackPieces, dictOfMyPiece)
 
     # Checkmate -> capture and check -> Capture -> Check
     if (not hasEatPiece and not isCheck): # No eats or no checks
