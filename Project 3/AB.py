@@ -27,7 +27,12 @@ class Game:
     ownPieces = {('e', 0): ('King', 'White'), ('d', 0): ('Queen', 'White'), ('c', 0): ('Bishop', 'White'), ('b', 0): ('Knight', 'White'), ('a', 0): ('Rook', 'White')
     , ('a', 1): ('Pawn', 'White'), ('b', 1): ('Pawn', 'White'), ('c', 1): ('Pawn', 'White'), ('d', 1): ('Pawn', 'White'), ('e', 1): ('Pawn', 'White')}
 
+    trial1 = {('a', 0): ('King', 'White')}
+
+    trial2 = {('a', 2): ('Rook', 'Black'), ('e', 4): ('King', 'Black')}
+
     startGameBoard = {**enemyPieces, **ownPieces}
+    #startGameBoard = {**trial1, **trial2}
     pass
 
 class Moves:        
@@ -328,7 +333,7 @@ class Moves:
         Moves.markBotLeft(x-1, y-1, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
 
 #Prune if cur iter val <= minAlphaVal
-def playerMin(minAlphaVal, maxBetaVal, totalMoves, dictOfWhitePieces, dictOfBlackPieces):
+def playerMin(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlackPieces):
     minVal = 999999 #set to inf
     dictOfWhiteThreats = {}
     dictOfMoves = {} #{'a0' : ('Queen', listOfPossibleMoves)}
@@ -342,17 +347,17 @@ def playerMin(minAlphaVal, maxBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
         (blackPiece, color) = dictOfBlackPieces.get(blackPos) #example: {'a0' : ('Queen', 'White'), 'd0' : ('Knight', 'Black'), 'g25' : ('Rook', 'White')}
         moves = getListOfMoves(blackPos, blackPiece, "Black", False, pqOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
         dictOfMoves[blackPos] = (blackPiece, moves)
-
-    if (len(dictOfMoves) == 0):
-        # Out of moves. Means draw
-        return -1,nextMove
     
     terminalValue = isTerminal(totalMoves, "Black", dictOfWhitePieces, dictOfBlackPieces)
     if (terminalValue > 0): # 1 = No more moves, 2 = No king, 0 = not terminal
         paddingList = [] #can ignore
         dictOfEnemyCover = {}
         if (terminalValue == 2): # Terminated due to a king missing.
-            return -1000,nextMove # I lost my king
+            return 1000,nextMove # I lost my king
+
+        if (len(dictOfMoves) == 0):
+        # Out of moves. Means draw
+            return 1,nextMove
 
         # Reached end of LDS. Need to get Current board value.
         for pos in dictOfBlackPieces: # Get the current threats for Opponent.
@@ -360,29 +365,29 @@ def playerMin(minAlphaVal, maxBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
             threats = getListOfMoves(pos, piece, "Black", True, paddingList, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover)
             dictOfWhiteThreats[pos] = threats # {'a0': list Of position he threatens}
 
-        return getUtil("White", dictOfWhiteThreats, dictOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover),nextMove
-    
+        return -getUtil("White", dictOfWhiteThreats, dictOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover),nextMove
+
     #iterate thru list of possible moves from best to worst
     while(len(pqOfMoves) > 0):
         (cost, (sourcePos, destPos)) = heapq.heappop(pqOfMoves)
         tmpDictOfWhitePiece = copy.copy(dictOfWhitePieces)
         tmpDictOfBlackPiece = copy.copy(dictOfBlackPieces)
         transitionModel(sourcePos, destPos, tmpDictOfBlackPiece, tmpDictOfWhitePiece)
-        curVal,hisMove = playerMax(minAlphaVal, maxBetaVal, totalMoves-1, tmpDictOfWhitePiece, tmpDictOfBlackPiece)
+        curVal,hisMove = playerMax(maxAlphaVal, minBetaVal, totalMoves-1, tmpDictOfWhitePiece, tmpDictOfBlackPiece)
         
         if (curVal < minVal):
-            if (curVal > maxBetaVal): #updates maxBeta Val
-                maxBetaVal = curVal
-                nextMove = (sourcePos, destPos)
+            if (curVal < minBetaVal): #updates maxBeta Val
+                minBetaVal = curVal
+            nextMove = (sourcePos, destPos)
             minVal = curVal
-            if (minVal <= minAlphaVal): #Prune
+            if (minVal <= maxAlphaVal): #Prune
                 return (minVal,nextMove)
             
     return minVal,nextMove
 
 #Prune if cur iter val >= maxBetaVal
 # white Piece
-def playerMax(minAlphaVal, maxBetaVal, totalMoves, dictOfWhitePieces, dictOfBlackPieces):
+def playerMax(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlackPieces):
     maxVal = -999999 #set to -inf
     dictOfBlackThreats = {}
     dictOfMoves = {} #{'a0' : ('Queen', listOfPossibleMoves)}
@@ -396,10 +401,6 @@ def playerMax(minAlphaVal, maxBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
         (whitePiece, color) = dictOfWhitePieces.get(whitePos) #example: {'a0' : ('Queen', 'White'), 'd0' : ('Knight', 'Black'), 'g25' : ('Rook', 'White')}
         moves = getListOfMoves(whitePos, whitePiece, "White", False, pqOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
         dictOfMoves[whitePos] = (whitePiece, moves)
-
-    if (len(dictOfMoves) == 0):
-        # Out of moves. Means draw
-        return -1, nextMove
     
     terminalValue = isTerminal(totalMoves, "White", dictOfWhitePieces, dictOfBlackPieces)
     if (terminalValue > 0): # 1 = No more moves, 2 = No king, 0 = not terminal
@@ -407,6 +408,10 @@ def playerMax(minAlphaVal, maxBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
         dictOfEnemyCover = {}
         if (terminalValue == 2): # Terminated due to a king missing.
             return -1000, nextMove # I lost my king
+
+        if (len(dictOfMoves) == 0):
+            # Out of moves. Means draw
+            return 1, nextMove
 
         # Reached end of LDS. Need to get Current board value.
         for pos in dictOfBlackPieces: # Get the current threats for Opponent.
@@ -422,15 +427,15 @@ def playerMax(minAlphaVal, maxBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
         tmpDictOfWhitePiece = copy.copy(dictOfWhitePieces)
         tmpDictOfBlackPiece = copy.copy(dictOfBlackPieces)
         transitionModel(sourcePos, destPos, tmpDictOfWhitePiece, tmpDictOfBlackPiece)
-        curVal, hisMove = playerMin(minAlphaVal, maxBetaVal, totalMoves-1, tmpDictOfWhitePiece, tmpDictOfBlackPiece)
+        curVal, hisMove = playerMin(maxAlphaVal, minBetaVal, totalMoves-1, tmpDictOfWhitePiece, tmpDictOfBlackPiece)
         #curVal = -curVal
         
         if (curVal > maxVal):
-            if (curVal < minAlphaVal): #updates minAlpha Val
-                minAlphaVal = curVal
-                nextMove = (sourcePos, destPos)
+            if (curVal > maxAlphaVal): #updates maxAlpha Val
+                maxAlphaVal = curVal
+            nextMove = (sourcePos, destPos)
             maxVal = curVal
-            if (maxVal >= maxBetaVal): #Prune
+            if (maxVal >= minBetaVal): #Prune
                 return maxVal, nextMove
             
     return maxVal, nextMove
@@ -454,11 +459,6 @@ def getUtil(color, dictOfEnemyThreats, dictOfMyAttacks, dictOfMyPiece, dictOfEne
         (piece, color) = dictOfMyPiece.get(pos)
         if (piece == "King"):
             kingPos = pos
-        
-    for pos in dictOfEnemyPiece:
-        (piece, color) = dictOfEnemyPiece.get(pos)
-        if (piece == "King"):
-            enemyKingPos = pos
     
     for originThreatPos in dictOfEnemyThreats: #Find who threatens my King
         if (kingPos in dictOfEnemyThreats.get(originThreatPos)):
@@ -710,7 +710,7 @@ def studentAgent(gameboard):
     move = (None,None)
 
     initializBoard(gameboard, dictOfWhitePieces, dictOfBlackPieces) #Populate dict of white/black and curboard.
-    (cost,move) = playerMax(1000000,-1000000,40,dictOfWhitePieces,dictOfBlackPieces)
+    (cost,move) = playerMax(-1000000,1000000,5,dictOfWhitePieces,dictOfBlackPieces)
 
     return move #Format to be returned (('a', 0), ('b', 3))
 
