@@ -365,7 +365,7 @@ def playerMin(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
             threats = getListOfMoves(pos, piece, "Black", True, paddingList, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover)
             dictOfWhiteThreats[pos] = threats # {'a0': list Of position he threatens}
 
-        return -getUtil("White", dictOfWhiteThreats, dictOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover),nextMove
+        return -getUtil("Black", dictOfWhiteThreats, dictOfMoves, dictOfBlackPieces, dictOfWhitePieces, dictOfEnemyCover, nextMove)
 
     #iterate thru list of possible moves from best to worst
     while(len(pqOfMoves) > 0):
@@ -453,12 +453,18 @@ def getUtil(color, dictOfEnemyThreats, dictOfMyAttacks, dictOfMyPiece, dictOfEne
     isCheckmate = False
     hasEatPiece = False
     isCheck = False
+    kingPos = None
 
     #Get position of my king and enemy king
     for pos in dictOfMyPiece:
         (piece, color) = dictOfMyPiece.get(pos)
         if (piece == "King"):
             kingPos = pos
+
+    if (kingPos == None):
+        if (color == "White"):
+            return -1000
+        return 1000
     
     for originThreatPos in dictOfEnemyThreats: #Find who threatens my King
         if (kingPos in dictOfEnemyThreats.get(originThreatPos)):
