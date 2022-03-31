@@ -3,38 +3,38 @@ import heapq
 from os import terminal_size
 import sys
 import weakref
-
+ 
 ### IMPORTANT: Remove any print() functions or rename any print functions/variables/string when submitting on CodePost
 ### The autograder will not run if it detects any print function.
 ### I AM WHITE, ENEMY IS BLACK
-
+ 
 class InitParams:
     rows = 5
     cols = 5
-
-
+ 
+ 
 class Board:
     dictOfRemovedPieces = {} #Pieces that have been removed from board.
     initialDictOfWhitePieces = {}
     initialDictOfBlackPieces = {}
     pass
-
+ 
 # gameboard example: {('a', 0) : ('Queen', 'White'), ('d', 10) : ('Knight', 'Black'), ('g', 25) : ('Rook', 'White')}
 class Game:
     enemyPieces = {('e', 4) : ('King', 'Black'), ('d', 4): ('Queen', 'Black'), ('c', 4): ('Bishop', 'Black'), ('b', 4): ('Knight', 'Black'), ('a', 4): ('Rook', 'Black')
     , ('a', 3): ('Pawn', 'Black'), ('b', 3): ('Pawn', 'Black'), ('c', 3): ('Pawn', 'Black'), ('d', 3): ('Pawn', 'Black'), ('e', 3): ('Pawn', 'Black')}
-
+ 
     ownPieces = {('e', 0): ('King', 'White'), ('d', 0): ('Queen', 'White'), ('c', 0): ('Bishop', 'White'), ('b', 0): ('Knight', 'White'), ('a', 0): ('Rook', 'White')
     , ('a', 1): ('Pawn', 'White'), ('b', 1): ('Pawn', 'White'), ('c', 1): ('Pawn', 'White'), ('d', 1): ('Pawn', 'White'), ('e', 1): ('Pawn', 'White')}
-
+ 
     trial1 = {('a', 0): ('King', 'White')}
-
+ 
     trial2 = {('a', 2): ('Rook', 'Black'), ('e', 4): ('King', 'Black')}
-
+ 
     startGameBoard = {**enemyPieces, **ownPieces}
     #startGameBoard = {**trial1, **trial2}
     pass
-
+ 
 class Moves:        
     def markKnightMove(pos, dictOfMoves, color, pqOfmoves, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover):
         (x,y) = chessPosToArr(pos)
@@ -82,7 +82,7 @@ class Moves:
         Moves.markTopLeft(x-1, y+1, 1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
         Moves.markBotRight(x+1, y-1, 1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
         Moves.markBotLeft(x-1, y-1, 1, dictOfMoves, color, pqOfmoves, pos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
-
+ 
     def markPawnMove(pos, color, dictOfMoves, onlyThreatPos, pqOfmoves, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover):
         (x,y) = chessPosToArr(pos)
         if (color == "White"): #Moves from top down increasing y val.
@@ -156,7 +156,7 @@ class Moves:
         heapq.heappush(pqOfmoves, node)
         numOfMoves-=1
         Moves.markUp(x, y+1, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover, isPawn)
-
+ 
     def markDown(x, y, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover, isPawn):
         maxRow = InitParams.rows - 1
         pos = arrToChessPos(x,y)
@@ -183,7 +183,7 @@ class Moves:
         heapq.heappush(pqOfmoves, node)
         numOfMoves-=1
         Moves.markDown(x, y-1, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover, isPawn)
-
+ 
     def markLeft(x, y, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover):
         maxCol = InitParams.cols - 1
         pos = arrToChessPos(x,y)
@@ -207,7 +207,7 @@ class Moves:
         heapq.heappush(pqOfmoves, node)
         numOfMoves-=1
         Moves.markLeft(x-1, y, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
-
+ 
     def markRight(x, y, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover):
         maxCol = InitParams.cols - 1
         pos = arrToChessPos(x,y)
@@ -231,7 +231,7 @@ class Moves:
         heapq.heappush(pqOfmoves, node)
         numOfMoves-=1
         Moves.markRight(x+1, y, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
-
+ 
     def markTopRight(x, y, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover):
         maxCol = InitParams.cols - 1
         maxRow = InitParams.rows - 1
@@ -256,7 +256,7 @@ class Moves:
         heapq.heappush(pqOfmoves, node)
         numOfMoves-=1
         Moves.markTopRight(x+1, y+1, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
-
+ 
     def markTopLeft(x, y, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover):
         maxCol = InitParams.cols - 1
         maxRow = InitParams.rows - 1
@@ -281,7 +281,7 @@ class Moves:
         heapq.heappush(pqOfmoves, node)
         numOfMoves-=1
         Moves.markTopLeft(x-1, y+1, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
-
+ 
     def markBotRight(x, y, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover):
         maxCol = InitParams.cols - 1
         maxRow = InitParams.rows - 1
@@ -331,7 +331,7 @@ class Moves:
         heapq.heappush(pqOfmoves, node)
         numOfMoves-=1
         Moves.markBotLeft(x-1, y-1, numOfMoves, dictOfMoves, color, pqOfmoves, originPos, dictOfWhitePieces, dictOfBlackPieces, dictOfMyCover)
-
+ 
 #Prune if cur iter val <= minAlphaVal
 def playerMin(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlackPieces):
     minVal = 999999 #set to inf
@@ -354,19 +354,20 @@ def playerMin(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
         dictOfEnemyCover = {}
         if (terminalValue == 2): # Terminated due to a king missing.
             return 1000,nextMove # I lost my king
-
+ 
         if (len(dictOfMoves) == 0):
         # Out of moves. Means draw
             return 1,nextMove
-
+ 
         # Reached end of LDS. Need to get Current board value.
         for pos in dictOfBlackPieces: # Get the current threats for Opponent.
             (piece, color) = dictOfBlackPieces.get(pos)
             threats = getListOfMoves(pos, piece, "Black", True, paddingList, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover)
             dictOfWhiteThreats[pos] = threats # {'a0': list Of position he threatens}
-
-        return -getUtil("White", dictOfWhiteThreats, dictOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover),nextMove
-
+ 
+        return -getUtil("Black", dictOfWhiteThreats, dictOfMoves, dictOfBlackPieces, dictOfWhitePieces, dictOfEnemyCover),nextMove
+        #return -getUtil("Black", dictOfWhiteThreats, dictOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover),nextMove
+ 
     #iterate thru list of possible moves from best to worst
     while(len(pqOfMoves) > 0):
         (cost, (sourcePos, destPos)) = heapq.heappop(pqOfMoves)
@@ -384,7 +385,7 @@ def playerMin(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
                 return (minVal,nextMove)
             
     return minVal,nextMove
-
+ 
 #Prune if cur iter val >= maxBetaVal
 # white Piece
 def playerMax(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlackPieces):
@@ -395,7 +396,7 @@ def playerMax(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
     heapq.heapify(pqOfMoves)
     dictOfMyCover = {}
     nextMove = (0,0)
-
+ 
     #Get list of moves
     for whitePos in dictOfWhitePieces:
         (whitePiece, color) = dictOfWhitePieces.get(whitePos) #example: {'a0' : ('Queen', 'White'), 'd0' : ('Knight', 'Black'), 'g25' : ('Rook', 'White')}
@@ -408,17 +409,17 @@ def playerMax(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
         dictOfEnemyCover = {}
         if (terminalValue == 2): # Terminated due to a king missing.
             return -1000, nextMove # I lost my king
-
+ 
         if (len(dictOfMoves) == 0):
             # Out of moves. Means draw
             return 1, nextMove
-
+ 
         # Reached end of LDS. Need to get Current board value.
         for pos in dictOfBlackPieces: # Get the current threats for Opponent.
             (piece, color) = dictOfBlackPieces.get(pos)
             threats = getListOfMoves(pos, piece, "Black", True, paddingList, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover)
             dictOfBlackThreats[pos] = threats # {'a0': list Of position he threatens}
-
+ 
         return getUtil("White", dictOfBlackThreats, dictOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover), nextMove
     
     #iterate thru list of possible moves from best to worst
@@ -439,7 +440,7 @@ def playerMax(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
                 return maxVal, nextMove
             
     return maxVal, nextMove
-
+ 
 # Ways to checkmate: Check if king can move out of the way OR get list of people threatens king & see if can eat any. OR see any local piece can block(Get from list of moves)
 # Possible current util vaues: Checkmate -> capture and check -> Capture -> Check
 # dictOfThreats = {'a0': list Of position he threatens, 'b0' : ....}
@@ -453,7 +454,7 @@ def getUtil(color, dictOfEnemyThreats, dictOfMyAttacks, dictOfMyPiece, dictOfEne
     isCheckmate = False
     hasEatPiece = False
     isCheck = False
-
+ 
     #Get position of my king and enemy king
     for pos in dictOfMyPiece:
         (piece, color) = dictOfMyPiece.get(pos)
@@ -468,7 +469,7 @@ def getUtil(color, dictOfEnemyThreats, dictOfMyAttacks, dictOfMyPiece, dictOfEne
     
     if (numOfThreats > 0): # If true -> no checks against king
         isCheck = True
-
+ 
     # Get total value of people that was ate.
     if (color == "White"):
         numOfPiecesAte = len(Board.initialDictOfWhitePieces) - len(dictOfEnemyPiece)
@@ -480,7 +481,7 @@ def getUtil(color, dictOfEnemyThreats, dictOfMyAttacks, dictOfMyPiece, dictOfEne
         if (numOfPiecesAte > 0):
             hasEatPiece = True
             valueOfEatenPiece = getValueOfPiecesEatened(Board.initialDictOfBlackPieces, dictOfMyPiece)
-
+ 
     # Checkmate -> capture and check -> Capture -> Check
     if (not hasEatPiece and not isCheck): # No eats or no checks
         return 0
@@ -580,7 +581,7 @@ def getValueOfPiecesEatened(dictOfInitialPieces, dictOfRemainingPieces):
             numOfRook+=1
         elif (piece == "Queen"):
             numOfQueen+=1
-
+ 
     #Minus current pieces
     for curPos in dictOfRemainingPieces:
         (curPiece, color) = dictOfRemainingPieces.get(curPos)
@@ -594,9 +595,9 @@ def getValueOfPiecesEatened(dictOfInitialPieces, dictOfRemainingPieces):
             numOfRook-=1
         elif (curPiece == "Queen"):
             numOfQueen-=1
-
+ 
     return numOfPawn*getPieceValue("Pawn") + numOfBishop*getPieceValue("Bishop") + numOfKnight*getPieceValue("Knight") + numOfRook*getPieceValue("Rook") + numOfQueen*getPieceValue("Queen")
-
+ 
 # dictOfPiece: {'a0' : ('Queen', 'White'), 'd0' : ('Knight', 'Black'), 'g25' : ('Rook', 'White')}
 def transitionModel(originPos, destPos, dictOfMyPieces, dictOfEnemyPieces):
     
@@ -605,7 +606,7 @@ def transitionModel(originPos, destPos, dictOfMyPieces, dictOfEnemyPieces):
     
     if (destPos in dictOfEnemyPieces): #Remove enemy Piece that i ate.
         dictOfEnemyPieces.pop(destPos)
-
+ 
 def getPieceValue(pieceName):
     if (pieceName == "King"):
         return 11
@@ -641,7 +642,7 @@ def isTerminal(numOfmoves, color, dictOfWhitePieces, dictOfBlackPieces):
                 else: # Has king and Has moves left.
                     return 0
         return 2 # No king left.
-
+ 
 # list of moves returned. Moves can either eat or not eat. All are valid.
 def getListOfMoves(pos, piece, color, onlyThreatFlag, pqOfmoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover):   
     dictOfMoves = {}
@@ -658,21 +659,21 @@ def getListOfMoves(pos, piece, color, onlyThreatFlag, pqOfmoves, dictOfWhitePiec
     elif (piece == "Pawn"):
         Moves.markPawnMove(pos, color, dictOfMoves, onlyThreatFlag, pqOfmoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover)
     return dictOfMoves
-
+ 
 # Converts chess coordinate to X,Y
 def chessPosToArr(pos) -> tuple:
     x = ord(pos[0]) - ord('a')
     y = int(pos[1:])
     return (x,y)
-
+ 
 # Converts X,Y to chess coords
 def arrToChessPos(x, y):
     ch = chr(x + ord('a'))
     return ch + str(y)
-
+ 
 def intToChar(curInt):
     return chr(curInt + ord('a'))
-
+ 
 #('d', 10) : ('Knight', 'Black') -> 'd10' : ('Knight', 'Black')
 def initializBoard(startGameBoard, dictOfWhitePieces, dictOfBlackPieces):
     for pos in startGameBoard:
@@ -690,7 +691,7 @@ def initializBoard(startGameBoard, dictOfWhitePieces, dictOfBlackPieces):
 # Chess Pieces: King, Queen, Knight, Bishop, Rook (First letter capitalized)
 # Colours: White, Black (First Letter capitalized)
 # Positions: Tuple. (column (String format), row (Int)). Example: ('a', 0)
-
+ 
 # Parameters:
 # gameboard: Dictionary of positions (Key) to the tuple of piece type and its colour (Value). This represents the current pieces left on the board.
 # Key: position is a tuple with the x-axis in String format and the y-axis in integer format.
@@ -700,18 +701,18 @@ def initializBoard(startGameBoard, dictOfWhitePieces, dictOfBlackPieces):
 # Return value:
 # move: A tuple containing the starting position of the piece being moved to the new position for the piece. x-axis in String format and y-axis in integer format.
 # move example: (('a', 0), ('b', 3))
-
+ 
 def studentAgent(gameboard):
     # You can code in here but you cannot remove this function, change its parameter or change the return type
     #config = sys.argv[1] #Takes in config.txt Optional
-
+ 
     dictOfWhitePieces = {} #example: {'a0' : ('Queen', 'White'), 'd0' : ('Knight', 'Black'), 'g25' : ('Rook', 'White')}
     dictOfBlackPieces = {}
     move = (None,None)
-
+ 
     initializBoard(gameboard, dictOfWhitePieces, dictOfBlackPieces) #Populate dict of white/black and curboard.
     (cost,move) = playerMax(-1000000,1000000,5,dictOfWhitePieces,dictOfBlackPieces)
-
+ 
     return move #Format to be returned (('a', 0), ('b', 3))
-
-#print(studentAgent(Game.startGameBoard))
+ 
+print(studentAgent(Game.startGameBoard))
