@@ -27,9 +27,9 @@ class Game:
     ownPieces = {('e', 0): ('King', 'White'), ('d', 0): ('Queen', 'White'), ('c', 0): ('Bishop', 'White'), ('b', 0): ('Knight', 'White'), ('a', 0): ('Rook', 'White')
     , ('a', 1): ('Pawn', 'White'), ('b', 1): ('Pawn', 'White'), ('c', 1): ('Pawn', 'White'), ('d', 1): ('Pawn', 'White'), ('e', 1): ('Pawn', 'White')}
  
-    trial1 = {('a', 0): ('King', 'White')}
+    trial1 = {('a', 0): ('King', 'White'), ('a', 2): ('Rook', 'White')}
  
-    trial2 = {('a', 2): ('Rook', 'Black'), ('e', 4): ('King', 'Black')}
+    trial2 = {('d', 4): ('King', 'Black'), ('a', 4): ('Pawn', 'Black'), ('e', 2): ('Bishop', 'Black')}
  
     startGameBoard = {**enemyPieces, **ownPieces}
     #startGameBoard = {**trial1, **trial2}
@@ -557,7 +557,7 @@ def getUtil(color, dictOfEnemyThreats, dictOfMyAttacks, dictOfMyPiece, dictOfEne
             return -6
     
     return -100 #unable to eat, hence checkmate.
-        
+
 #Find the total value of missing pieces
 #example: {'a0' : ('Queen', 'White'), 'd0' : ('Knight', 'Black'), 'g25' : ('Rook', 'White')}
 def getValueOfPiecesEatened(dictOfInitialPieces, dictOfRemainingPieces):
