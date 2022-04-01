@@ -711,8 +711,8 @@ def studentAgent(gameboard):
     move = (None,None)
  
     initializBoard(gameboard, dictOfWhitePieces, dictOfBlackPieces) #Populate dict of white/black and curboard.
-    (cost,move) = playerMax(-1000000,1000000,5,dictOfWhitePieces,dictOfBlackPieces)
+    (cost,move) = playerMax(-1000000,1000000,3,dictOfWhitePieces,dictOfBlackPieces)
  
     return move #Format to be returned (('a', 0), ('b', 3))
  
-print(studentAgent(Game.startGameBoard))
+#print(studentAgent(Game.startGameBoard))
