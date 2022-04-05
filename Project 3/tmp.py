@@ -1,6 +1,7 @@
 import AB
 import FalAB
 import copy
+import MarkusAB
 
 class Game:
     enemyPieces = {('e', 4) : ('King', 'Black'), ('d', 4): ('Queen', 'Black'), ('c', 4): ('Bishop', 'Black'), ('b', 4): ('Knight', 'Black'), ('a', 4): ('Rook', 'Black')
@@ -21,10 +22,10 @@ class Game:
 
 def fight():
     k = 0
-    while (k < 80):
+    while (k < 50):
         board = {**Game.enemyPieces, **Game.ownPieces}
         tmp = copy.deepcopy(board)
-        (src, dest) = FalAB.studentAgent(tmp)
+        (src, dest) = MarkusAB.studentAgent(tmp)
         src = posToStr(src)
         dest = posToStr(dest)
         #print(src)
@@ -36,7 +37,7 @@ def fight():
             return
         board = {**Game.tmpEnemyPiece, **Game.tmpOwnPiece}
         tmp = copy.deepcopy(board)
-        (src, dest) = AB.studentAgent(tmp)
+        (src, dest) = FalAB.studentAgent(tmp)
         src = posToStr(src)
         dest = posToStr(dest)
         print(src, " ", dest)
