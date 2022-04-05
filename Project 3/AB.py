@@ -511,7 +511,7 @@ def getUtil(color, dictOfEnemyThreats, dictOfMyAttacks, dictOfMyPiece, dictOfEne
             break
         
     if (canEscape and hasEatPiece): # Can escape means no checkmate.
-        return -(valueOfEatenPiece + 6)
+        return -(valueOfEatenPiece + 54) #Trying eat + check move val.
     elif (canEscape and not hasEatPiece): # Can escape but never ate any means only check
         return -6
     
@@ -552,11 +552,11 @@ def getUtil(color, dictOfEnemyThreats, dictOfMyAttacks, dictOfMyPiece, dictOfEne
                         break
                     
         if (not isCheckmate and isCheck and hasEatPiece ):
-            return -(valueOfEatenPiece + 6)
+            return -(valueOfEatenPiece + 54)
         if (not isCheckmate and isCheck and not hasEatPiece):
             return -6
     
-    return -100 #unable to eat, hence checkmate.
+    return -1000 #unable to eat, hence checkmate.
 
 #Find the total value of missing pieces
 #example: {'a0' : ('Queen', 'White'), 'd0' : ('Knight', 'Black'), 'g25' : ('Rook', 'White')}
