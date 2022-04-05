@@ -444,7 +444,7 @@ def playerMax(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
 # Ways to checkmate: Check if king can move out of the way OR get list of people threatens king & see if can eat any. OR see any local piece can block(Get from list of moves)
 # Possible current util vaues: Checkmate -> capture and check -> Capture -> Check
 # dictOfThreats = {'a0': list Of position he threatens, 'b0' : ....}
-# Check = -6, Checkmate = -100
+# Check = -6, Checkmate = -1000
 # dictOfPiece: {'a0' : ('Queen', 'White'), 'd0' : ('Knight', 'Black'), 'g25' : ('Rook', 'White')}
 # dict of my atk: {'a0': ('Queen', dict of position it threatens)}
 def getUtil(color, dictOfEnemyThreats, dictOfMyAttacks, dictOfMyPiece, dictOfEnemyPiece, dictOfEnemyCover):
@@ -715,4 +715,4 @@ def studentAgent(gameboard):
  
     return move #Format to be returned (('a', 0), ('b', 3))
  
-#print(studentAgent(Game.startGameBoard))
+print(studentAgent(Game.startGameBoard))
