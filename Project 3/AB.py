@@ -1,8 +1,6 @@
 import copy
 import heapq
-from os import terminal_size
-import sys
-import weakref
+
  
 ### IMPORTANT: Remove any print() functions or rename any print functions/variables/string when submitting on CodePost
 ### The autograder will not run if it detects any print function.
@@ -341,6 +339,7 @@ def playerMin(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
     heapq.heapify(pqOfMoves)
     dictOfMyCover = {}
     nextMove = (0,0)
+    isCheckmate = False
     
     #Get list of moves
     for blackPos in dictOfBlackPieces:
@@ -353,11 +352,11 @@ def playerMin(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
         paddingList = [] #can ignore
         dictOfEnemyCover = {}
         if (terminalValue == 2): # Terminated due to a king missing.
-            return 1000,nextMove # I lost my king
+            return 1000,nextMove, isCheckmate # I lost my king
  
         if (len(dictOfMoves) == 0):
         # Out of moves. Means draw
-            return 1,nextMove
+            return 1,nextMove, isCheckmate
  
         # Reached end of LDS. Need to get Current board value.
         for pos in dictOfBlackPieces: # Get the current threats for Opponent.
@@ -365,26 +364,30 @@ def playerMin(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
             threats = getListOfMoves(pos, piece, "Black", True, paddingList, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover)
             dictOfWhiteThreats[pos] = threats # {'a0': list Of position he threatens}
  
-        return -getUtil("Black", dictOfWhiteThreats, dictOfMoves, dictOfBlackPieces, dictOfWhitePieces, dictOfEnemyCover),nextMove
+        return -getUtil("Black", dictOfWhiteThreats, dictOfMoves, dictOfBlackPieces, dictOfWhitePieces, dictOfEnemyCover),nextMove, isCheckmate
         #return -getUtil("Black", dictOfWhiteThreats, dictOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover),nextMove
  
     #iterate thru list of possible moves from best to worst
+    isCheckmate = True
     while(len(pqOfMoves) > 0):
         (cost, (sourcePos, destPos)) = heapq.heappop(pqOfMoves)
         tmpDictOfWhitePiece = copy.copy(dictOfWhitePieces)
         tmpDictOfBlackPiece = copy.copy(dictOfBlackPieces)
         transitionModel(sourcePos, destPos, tmpDictOfBlackPiece, tmpDictOfWhitePiece)
-        curVal,hisMove = playerMax(maxAlphaVal, minBetaVal, totalMoves-1, tmpDictOfWhitePiece, tmpDictOfBlackPiece)
+        curVal,hisMove,nil = playerMax(maxAlphaVal, minBetaVal, totalMoves-1, tmpDictOfWhitePiece, tmpDictOfBlackPiece)
         
+        if (curVal != 1000):
+            isCheckmate = False
+
         if (curVal < minVal):
             if (curVal < minBetaVal): #updates maxBeta Val
                 minBetaVal = curVal
             nextMove = (sourcePos, destPos)
             minVal = curVal
             if (minVal <= maxAlphaVal): #Prune
-                return (minVal,nextMove)
+                return minVal,nextMove, isCheckmate
             
-    return minVal,nextMove
+    return minVal,nextMove, isCheckmate
  
 #Prune if cur iter val >= maxBetaVal
 # white Piece
@@ -396,6 +399,7 @@ def playerMax(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
     heapq.heapify(pqOfMoves)
     dictOfMyCover = {}
     nextMove = (0,0)
+    isCheckmate = False
  
     #Get list of moves
     for whitePos in dictOfWhitePieces:
@@ -408,11 +412,11 @@ def playerMax(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
         paddingList = [] #can ignore
         dictOfEnemyCover = {}
         if (terminalValue == 2): # Terminated due to a king missing.
-            return -1000, nextMove # I lost my king
+            return -1000, nextMove, isCheckmate # I lost my king
  
         if (len(dictOfMoves) == 0):
             # Out of moves. Means draw
-            return 1, nextMove
+            return 1, nextMove, isCheckmate
  
         # Reached end of LDS. Need to get Current board value.
         for pos in dictOfBlackPieces: # Get the current threats for Opponent.
@@ -420,16 +424,20 @@ def playerMax(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
             threats = getListOfMoves(pos, piece, "Black", True, paddingList, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover)
             dictOfBlackThreats[pos] = threats # {'a0': list Of position he threatens}
  
-        return getUtil("White", dictOfBlackThreats, dictOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover), nextMove
+        return getUtil("White", dictOfBlackThreats, dictOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover), nextMove, isCheckmate
     
     #iterate thru list of possible moves from best to worst
+    isCheckmate = True
     while(len(pqOfMoves) > 0):
         (cost, (sourcePos, destPos)) = heapq.heappop(pqOfMoves)
         tmpDictOfWhitePiece = copy.copy(dictOfWhitePieces)
         tmpDictOfBlackPiece = copy.copy(dictOfBlackPieces)
         transitionModel(sourcePos, destPos, tmpDictOfWhitePiece, tmpDictOfBlackPiece)
-        curVal, hisMove = playerMin(maxAlphaVal, minBetaVal, totalMoves-1, tmpDictOfWhitePiece, tmpDictOfBlackPiece)
+        curVal, hisMove, nill = playerMin(maxAlphaVal, minBetaVal, totalMoves-1, tmpDictOfWhitePiece, tmpDictOfBlackPiece)
         #curVal = -curVal
+
+        if (curVal != -1000):
+            isCheckmate = False
         
         if (curVal > maxVal):
             if (curVal > maxAlphaVal): #updates maxAlpha Val
@@ -437,9 +445,9 @@ def playerMax(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
             nextMove = (sourcePos, destPos)
             maxVal = curVal
             if (maxVal >= minBetaVal): #Prune
-                return maxVal, nextMove
+                return maxVal, nextMove, isCheckmate
             
-    return maxVal, nextMove
+    return maxVal, nextMove, isCheckmate
  
 # Ways to checkmate: Check if king can move out of the way OR get list of people threatens king & see if can eat any. OR see any local piece can block(Get from list of moves)
 # Possible current util vaues: Checkmate -> capture and check -> Capture -> Check
@@ -711,8 +719,8 @@ def studentAgent(gameboard):
     move = (None,None)
  
     initializBoard(gameboard, dictOfWhitePieces, dictOfBlackPieces) #Populate dict of white/black and curboard.
-    (cost,move) = playerMax(-1000000,1000000,3,dictOfWhitePieces,dictOfBlackPieces)
+    cost, move, nil = playerMax(-1000000,1000000,3,dictOfWhitePieces,dictOfBlackPieces)
  
     return move #Format to be returned (('a', 0), ('b', 3))
  
-print(studentAgent(Game.startGameBoard))
+#print(studentAgent(Game.startGameBoard))
