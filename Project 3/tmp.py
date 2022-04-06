@@ -20,12 +20,18 @@ class Game:
     #startGameBoard = {**trial1, **trial2}
     pass
 
+
+# HOW TO USE:
+# Step 1: Drag and drop file into same folder as this code.
+# Step 2: Import both players code using the "import <Player's Code file name>"
+# Step 3: Decide who to go first by editing which code to call 1st. See below on where to change between plyaer 1 or player 2.
+
 def fight():
     k = 0
     while (k < 50):
         board = {**Game.enemyPieces, **Game.ownPieces}
         tmp = copy.deepcopy(board)
-        (src, dest) = MarkusAB.studentAgent(tmp)
+        (src, dest) = MarkusAB.studentAgent(tmp) #Player 1
         src = posToStr(src)
         dest = posToStr(dest)
         #print(src)
@@ -37,7 +43,7 @@ def fight():
             return
         board = {**Game.tmpEnemyPiece, **Game.tmpOwnPiece}
         tmp = copy.deepcopy(board)
-        (src, dest) = FalAB.studentAgent(tmp)
+        (src, dest) = FalAB.studentAgent(tmp) #Player 2
         src = posToStr(src)
         dest = posToStr(dest)
         print(src, " ", dest)
