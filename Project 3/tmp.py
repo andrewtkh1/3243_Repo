@@ -2,6 +2,7 @@ import AB
 import FalAB
 import copy
 import MarkusAB
+import waiKitAB
 
 class Game:
     enemyPieces = {('e', 4) : ('King', 'Black'), ('d', 4): ('Queen', 'Black'), ('c', 4): ('Bishop', 'Black'), ('b', 4): ('Knight', 'Black'), ('a', 4): ('Rook', 'Black')
@@ -31,23 +32,23 @@ def fight():
     while (k < 50):
         board = {**Game.enemyPieces, **Game.ownPieces}
         tmp = copy.deepcopy(board)
-        (src, dest) = MarkusAB.studentAgent(tmp) #Player 1
+        (src, dest) = AB.studentAgent(tmp) #Player 1
         src = posToStr(src)
         dest = posToStr(dest)
         #print(src)
-        print(src, " ", dest)
-        print("\n",tmp)
+        print(src, " ", dest, "White")
+        print(tmp,"\n")
         move(1, src, dest)
         if (checkWhoWin(2)):
             print("WHITE WIN")
             return
         board = {**Game.tmpEnemyPiece, **Game.tmpOwnPiece}
         tmp = copy.deepcopy(board)
-        (src, dest) = FalAB.studentAgent(tmp) #Player 2
+        (src, dest) = waiKitAB.studentAgent(tmp) #Player 2
         src = posToStr(src)
         dest = posToStr(dest)
-        print(src, " ", dest)
-        print("\n",tmp)
+        print(src, " ", dest, "Black")
+        print(tmp,"\n")
         move(2, src, dest)
         if (checkWhoWin(1)):
             print("BLACK WIN")

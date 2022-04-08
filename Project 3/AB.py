@@ -1,5 +1,6 @@
 import copy
 import heapq
+from inspect import isclass
 
  
 ### IMPORTANT: Remove any print() functions or rename any print functions/variables/string when submitting on CodePost
@@ -352,20 +353,22 @@ def playerMin(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
         paddingList = [] #can ignore
         dictOfEnemyCover = {}
         if (terminalValue == 2): # Terminated due to a king missing.
-            return 1000,nextMove, isCheckmate # I lost my king
+            return getNewUtil(dictOfWhitePieces, dictOfBlackPieces), nextMove, isCheckmate
+            #return 1000,nextMove, isCheckmate # I lost my king
  
         if (len(dictOfMoves) == 0):
         # Out of moves. Means draw
-            return 1,nextMove, isCheckmate
+            return 0,nextMove, isCheckmate
  
         # Reached end of LDS. Need to get Current board value.
-        for pos in dictOfBlackPieces: # Get the current threats for Opponent.
-            (piece, color) = dictOfBlackPieces.get(pos)
-            threats = getListOfMoves(pos, piece, "Black", True, paddingList, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover)
-            dictOfWhiteThreats[pos] = threats # {'a0': list Of position he threatens}
+        # for pos in dictOfBlackPieces: # Get the current threats for Opponent.
+        #     (piece, color) = dictOfBlackPieces.get(pos)
+        #     threats = getListOfMoves(pos, piece, "Black", True, paddingList, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover)
+        #     dictOfWhiteThreats[pos] = threats # {'a0': list Of position he threatens}
  
-        return -getUtil("Black", dictOfWhiteThreats, dictOfMoves, dictOfBlackPieces, dictOfWhitePieces, dictOfEnemyCover),nextMove, isCheckmate
-        #return -getUtil("Black", dictOfWhiteThreats, dictOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover),nextMove
+        # return -getUtil("Black", dictOfWhiteThreats, dictOfMoves, dictOfBlackPieces, dictOfWhitePieces, dictOfEnemyCover),nextMove, isCheckmate
+        return getNewUtil(dictOfWhitePieces, dictOfBlackPieces), nextMove, isCheckmate
+        
  
     #iterate thru list of possible moves from best to worst
     isCheckmate = True
@@ -412,21 +415,24 @@ def playerMax(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
         paddingList = [] #can ignore
         dictOfEnemyCover = {}
         if (terminalValue == 2): # Terminated due to a king missing.
-            return -1000, nextMove, isCheckmate # I lost my king
+            return getNewUtil(dictOfWhitePieces, dictOfBlackPieces), nextMove, isCheckmate
+            #return -1000, nextMove, isCheckmate # I lost my king
  
         if (len(dictOfMoves) == 0):
             # Out of moves. Means draw
-            return 1, nextMove, isCheckmate
+            return 0, nextMove, isCheckmate
+            #return 1, nextMove, isCheckmate
  
         # Reached end of LDS. Need to get Current board value.
-        for pos in dictOfBlackPieces: # Get the current threats for Opponent.
-            (piece, color) = dictOfBlackPieces.get(pos)
-            threats = getListOfMoves(pos, piece, "Black", True, paddingList, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover)
-            dictOfBlackThreats[pos] = threats # {'a0': list Of position he threatens}
+        # for pos in dictOfBlackPieces: # Get the current threats for Opponent.
+        #     (piece, color) = dictOfBlackPieces.get(pos)
+        #     threats = getListOfMoves(pos, piece, "Black", True, paddingList, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover)
+        #     dictOfBlackThreats[pos] = threats # {'a0': list Of position he threatens}
  
-        return getUtil("White", dictOfBlackThreats, dictOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover), nextMove, isCheckmate
+        #return getUtil("White", dictOfBlackThreats, dictOfMoves, dictOfWhitePieces, dictOfBlackPieces, dictOfEnemyCover), nextMove, isCheckmate
+        return getNewUtil(dictOfWhitePieces, dictOfBlackPieces), nextMove, isCheckmate
     
-    curOpt = 999
+
     #iterate thru list of possible moves from best to worst
     isCheckmate = True
     while(len(pqOfMoves) > 0):
@@ -450,6 +456,20 @@ def playerMax(maxAlphaVal, minBetaVal, totalMoves, dictOfWhitePieces, dictOfBlac
             
     return maxVal, nextMove, isCheckmate
  
+def getNewUtil(dictOfWhitePieces, dictOfBlackPiece):
+    whiteVal = 0
+    blackVal = 0
+    for pcs in dictOfWhitePieces:
+        (piece, color) = dictOfWhitePieces.get(pcs)
+        whiteVal += getPieceValueNew(piece)
+    
+    for blkPcs in dictOfBlackPiece:
+        (blkPices, color) = dictOfBlackPiece.get(blkPcs)
+        blackVal += getPieceValueNew(blkPices)
+    
+    return whiteVal - blackVal
+
+
 # Ways to checkmate: Check if king can move out of the way OR get list of people threatens king & see if can eat any. OR see any local piece can block(Get from list of moves)
 # Possible current util vaues: Checkmate (0)-> Draw(1) -> capture and check (2) -> Capture(3) -> Check(4)
 # dictOfThreats = {'a0': list Of position he threatens, 'b0' : ....}
@@ -471,7 +491,7 @@ def getUtil(color, dictOfEnemyThreats, dictOfMyAttacks, dictOfMyPiece, dictOfEne
             kingPos = pos
 
     if (kingPos == None):
-        return (0,-1000)
+        return -1000
     
     for originThreatPos in dictOfEnemyThreats: #Find who threatens my King
         if (kingPos in dictOfEnemyThreats.get(originThreatPos)):
@@ -496,9 +516,9 @@ def getUtil(color, dictOfEnemyThreats, dictOfMyAttacks, dictOfMyPiece, dictOfEne
  
     # Checkmate -> capture and check -> Capture -> Check
     if (not hasEatPiece and not isCheck): # No eats or no checks
-        return (4,0)
+        return 0
     elif (not isCheck and hasEatPiece): # Only Ate
-        return (2, -(valueOfEatenPiece))
+        return -(valueOfEatenPiece)
     
     # Try to escape first!
     nullList = [] #Just to fill up the parameter
@@ -522,7 +542,7 @@ def getUtil(color, dictOfEnemyThreats, dictOfMyAttacks, dictOfMyPiece, dictOfEne
     if (canEscape and hasEatPiece): # Can escape means no checkmate.
         return -(valueOfEatenPiece + 54) #Trying eat + check move val.
     elif (canEscape and not hasEatPiece): # Can escape but never ate any means only check
-        return (3, -6)
+        return -6
     
     #Unable to move out of the way, Try to eat it.
     if (numOfThreats == 1): # IF only 1 threat against King, can consider eating it to escape.
@@ -563,7 +583,7 @@ def getUtil(color, dictOfEnemyThreats, dictOfMyAttacks, dictOfMyPiece, dictOfEne
         if (not isCheckmate and isCheck and hasEatPiece ):
             return -(valueOfEatenPiece + 54)
         if (not isCheckmate and isCheck and not hasEatPiece):
-            return (3,-6)
+            return -6
     
     return -1000 #unable to eat, hence checkmate.
 
@@ -629,6 +649,20 @@ def getPieceValue(pieceName):
         return 8
     if (pieceName == "Pawn"):
         return 7
+
+def getPieceValueNew(pieceName):
+    if (pieceName == "King"):
+        return 20000
+    if (pieceName == "Queen"):
+        return 900
+    if (pieceName == "Rook"):
+        return 500
+    if (pieceName == "Bishop"):
+        return 330
+    if (pieceName == "Knight"):
+        return 320
+    if (pieceName == "Pawn"):
+        return 100
     
 # Terminal cases. King is gone.
 def isTerminal(numOfmoves, color, dictOfWhitePieces, dictOfBlackPieces):
@@ -720,7 +754,7 @@ def studentAgent(gameboard):
     move = (None,None)
  
     initializBoard(gameboard, dictOfWhitePieces, dictOfBlackPieces) #Populate dict of white/black and curboard.
-    cost, move, nil = playerMax(-1000000,1000000,3,dictOfWhitePieces,dictOfBlackPieces)
+    cost, move, nil = playerMax(-1000000,1000000,4,dictOfWhitePieces,dictOfBlackPieces)
  
     return move #Format to be returned (('a', 0), ('b', 3))
  
